@@ -1,0 +1,30 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    volumes:
+      - $HOME/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  elastic:
+    image: elasticsearch:7.17.5
+    environment:
+      ES_JAVA_OPTS: "-Xms200m -Xmx200m"
+      discovery.type: single-node
+    ports:
+      - '9200:9200'
+
+  etl_pipeline:
+      build: .
+      depends_on:
+        - postgres
+        - elastic
+      env_file:
+        - .env
+volumes:
+  esdata:

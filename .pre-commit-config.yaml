@@ -3,14 +3,9 @@ repos:
     hooks:
       - id: flake8
         name: flake8
-        description: wemake-python-styleguide enforcement
         entry: flake8
         args: [
-            '--config=setup.cfg' ,
-            '--ignore=WPS305,WPS318,WPS323,WPS210,WPS326,WPS347,
-                           I004,I001,I005,
-                           D100,D412,
-                           DAR101,DAR401',
+            '--config=setup.cfg'
         ]
         language: python
         types: [ python ]
