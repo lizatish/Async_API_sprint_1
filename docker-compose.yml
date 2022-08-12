@@ -19,12 +19,12 @@ services:
     ports:
       - '9200:9200'
 
-  etl_pipeline:
-      build: .
-      depends_on:
-        - postgres
-        - elastic
-      env_file:
-        - .env
+#  etl_pipeline:
+#      build: .
+#      depends_on:
+#        - postgres
+#        - elastic
+#      env_file:
+#        - .env
 volumes:
   esdata:

@@ -6,8 +6,8 @@ import elastic_transport
 import elasticsearch
 from elasticsearch.helpers import bulk
 
-from app.logger import get_logger
-from app.postgres_utils import backoff
+from services.film_work_etl.logger import get_logger
+from services.film_work_etl.postgres_utils import backoff
 
 logger = get_logger()
 

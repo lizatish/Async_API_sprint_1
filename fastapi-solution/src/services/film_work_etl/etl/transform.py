@@ -1,7 +1,7 @@
 from typing import Iterator
 
-from app.models.main import RoleType
-from app.models.utils_sql import MergeResult
+from services.film_work_etl.models.main import RoleType
+from services.film_work_etl.models.utils_sql import MergeResult
 
 
 class Transform(object):

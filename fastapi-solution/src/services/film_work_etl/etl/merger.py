@@ -2,9 +2,9 @@ import dataclasses
 
 from psycopg2.extensions import connection as pg_connection
 
-from app.etl.base import BaseExtractor
-from app.models.utils_sql import MergeResult
-from app.utils.convert import convert_sql2models
+from services.film_work_etl.etl.base import BaseExtractor
+from services.film_work_etl.models.utils_sql import MergeResult
+from services.film_work_etl.utils.convert import convert_sql2models
 
 
 class Merger(BaseExtractor):
