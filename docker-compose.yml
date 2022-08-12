@@ -19,6 +19,15 @@ services:
     ports:
       - '9200:9200'
 
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/redis:/data
+    restart: always
+
 #  etl_pipeline:
 #      build: .
 #      depends_on:
