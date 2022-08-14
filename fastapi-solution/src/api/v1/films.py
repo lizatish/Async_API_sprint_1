@@ -1,8 +1,8 @@
 from http import HTTPStatus
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
@@ -11,7 +11,7 @@ router = APIRouter()
 class Film(BaseModel):
     """Модель фильма для ответа пользователю."""
 
-    id: str
+    uuid: UUID
     title: str
 
 
@@ -22,4 +22,4 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
 
-    return Film(id=film.id, title=film.title)
+    return Film(uuid=film.uuid, title=film.title)

@@ -1,6 +1,9 @@
-import orjson
+from datetime import date
+from typing import List, Literal
+from uuid import UUID
 
-from pydantic import BaseModel
+import orjson
+from pydantic import BaseModel, Field, FilePath
 
 
 def orjson_dumps(v, *, default):
@@ -8,15 +11,45 @@ def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
 
 
-class Film(BaseModel):
-    """Модель кинопроизведения."""
+class UUIDMixin(BaseModel):
+    """Базовая модель."""
 
-    id: str
-    title: str
-    description: str
+    uuid: UUID = Field(..., alias='id')
 
     class Config:
-        """Доп. конфигурации для модели кинопроизведения."""
+        """Доп. конфигурации для базовой модели."""
 
+        allow_population_by_field_name = True
         json_loads = orjson.loads
         json_dumps = orjson_dumps
+
+
+class Person(UUIDMixin):
+    """Модель персонажа."""
+
+    full_name: str = Field(..., alias='name')
+    films_ids: List[str] = []
+    role: Literal['actor', 'writer', 'director', ''] = ''
+
+
+class Genre(UUIDMixin):
+    """Модель жанра."""
+
+    name: str = ''
+    description: str = ''
+
+
+class Film(UUIDMixin):
+    """Модель кинопроизведения."""
+
+    title: str = ''
+    imdb_rating: float = 0.0
+    description: str = ''
+    genre: List[Genre] = []
+    actors: List[Person] = []
+    writers: List[Person] = []
+    directors: List[Person] = []
+    creation_date: date = None
+    age_limit: int = 0
+    file: FilePath = None
+    type: Literal['movie', 'tv_show', ''] = ''
