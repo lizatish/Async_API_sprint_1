@@ -1,17 +1,17 @@
 from elasticsearch import Elasticsearch
 from psycopg2.extensions import connection as pg_connection
 
-from services.film_work_etl.etl.elasticsearch_loader import ElasticsearchLoader
-from services.film_work_etl.etl.enricher import Enricher
-from services.film_work_etl.etl.merger import Merger
-from services.film_work_etl.etl.producer import (
+from services.etl.common.postgres_utils import create_pg_connection
+from services.etl.common.settings import conf
+from services.etl.common.state import State, JsonFileStorage
+from services.etl.film_works.elasticsearch_loader import ElasticsearchLoader
+from services.etl.film_works.enricher import Enricher
+from services.etl.film_works.merger import Merger
+from services.etl.film_works.producer import (
     PersonProducer,
     FilmWorkProducer,
 )
-from services.film_work_etl.etl.transform import Transform
-from services.film_work_etl.postgres_utils import create_pg_connection
-from services.film_work_etl.settings import conf
-from services.film_work_etl.state import State, JsonFileStorage
+from services.etl.film_works.transform import Transform
 
 
 def run_film_works_etl(
