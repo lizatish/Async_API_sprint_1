@@ -5,7 +5,8 @@ class FilmWorksSettings(ETLSettings):
     """Настройки приложения."""
 
     elastic_index_name: str = 'movies'
-    index_json_path: str = ETLSettings.base_dir + '/fastapi-solution/src/services/etl/indices/movies.json'
+    index_json_path: str = ''.join(['/Users/lizatish/PycharmProjects/Async_API_sprint_1/',
+                                    'fastapi-solution/src/services/etl/indices/movies.json'])
     table_name: str = 'film_work'
 
 
