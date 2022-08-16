@@ -2,14 +2,14 @@ from elasticsearch import Elasticsearch
 from psycopg2.extensions import connection as pg_connection
 
 from services.etl.common.components.elasticsearch_loader import ElasticsearchLoader
+from services.etl.common.components.producer import (
+    PersonProducer,
+    FilmWorkProducer,
+)
 from services.etl.common.postgres_utils import create_pg_connection
 from services.etl.common.state import State, JsonFileStorage
 from services.etl.film_works.enricher import Enricher
 from services.etl.film_works.merger import Merger
-from services.etl.film_works.producer import (
-    PersonProducer,
-    FilmWorkProducer,
-)
 from services.etl.film_works.settings import conf
 from services.etl.film_works.transform import Transform
 
