@@ -6,7 +6,8 @@
         "type": "keyword"
       },
       "name": {
-        "type": "keyword"
+        "type": "keyword",
+        "analyzer": "ru_en"
       },
       "description": {
         "type": "text",
