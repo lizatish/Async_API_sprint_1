@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -113,11 +113,47 @@ class FilmService:
             person = await self._get_person_from_elastic(person_id)
         return person
 
+    async def get_films_by_person(self, person_id: str) -> List[Optional[Film]]:
+        roles = ['writers', 'actors', 'directors']
+        films = []
+
+        for role in roles:
+            try:
+                docs = await self.elastic.search(
+                    index=self.es_index,
+                    body={
+                        "query": {
+                            "nested": {
+                                "path": role,
+                                "query": {
+                                    "bool": {
+                                        "must": [
+                                            {
+                                                "match": {
+                                                    f"{role}.id": person_id,
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                )
+
+                for doc in docs['hits']['hits']:
+                    source = doc['_source']
+
+                    films.append(Film(**source))
+
+            except NotFoundError:
+                pass
+        return films
+
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
 
         person = None
-        # todo добавить directors
-        roles = ['writers', 'actors']
+        roles = ['writers', 'actors', 'directors']
         for role in roles:
             try:
                 docs = await self.elastic.search(

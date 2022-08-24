@@ -1,22 +1,24 @@
-import orjson
+from typing import List, Optional
 
-from pydantic import BaseModel
-
-
-def orjson_dumps(v, *, default):
-    """Функция-подмена для быстрой работы c json."""
-    return orjson.dumps(v, default=default).decode()
+from models.common import UUIDMixin
+from models.person import Person
 
 
-class Film(BaseModel):
+class Genre(UUIDMixin):
+    """Модель жанра."""
+
+    name: str
+    description: Optional[str]
+
+
+class Film(UUIDMixin):
     """Модель кинопроизведения."""
 
-    id: str
     title: str
-    description: str
-
-    class Config:
-        """Доп. конфигурации для модели кинопроизведения."""
-
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
+    imdb_rating: float
+    description: Optional[str]
+    genre: List[Genre] = []
+    actors: List[Person] = []
+    writers: List[Person] = []
+    directors: List[Person] = []
+    age_limit: int = 0

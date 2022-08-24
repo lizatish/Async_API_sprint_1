@@ -22,6 +22,13 @@ class Person(BaseModel):
     films: List[Optional[PersonFilm]] = []
 
 
+class FilmByPerson(BaseModel):
+    """Модель для представления получения фильмов по персоне."""
+    uuid: str
+    title: str
+    imdb_rating: float
+
+
 @router.get('/{person_id}', response_model=Person)
 async def person_details(person_id: str, person_service: PersonService = Depends(get_person_service),
                          film_service: FilmService = Depends(get_film_service)) -> Person:
@@ -35,3 +42,21 @@ async def person_details(person_id: str, person_service: PersonService = Depends
     person = await person_service.enrich_person_data(person, fw_person_info)
 
     return Person(uuid=person.id, films=person.films)
+
+
+@router.get('/{person_id}/film', response_model=List[FilmByPerson])
+async def films_by_person(person_id: str,
+                          film_service: FilmService = Depends(get_film_service)) -> List[FilmByPerson]:
+    fws_by_person = await film_service.get_films_by_person(person_id)
+    if not fws_by_person:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
+
+    result = []
+    for fw in fws_by_person:
+        fw_model = FilmByPerson(
+            uuid=fw.id,
+            title=fw.title,
+            imdb_rating=fw.imdb_rating,
+        )
+        result.append(fw_model)
+    return result
