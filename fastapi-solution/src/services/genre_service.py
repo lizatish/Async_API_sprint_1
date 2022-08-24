@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -22,54 +22,25 @@ class GenreService:
 
         self.es_index = 'genres'
 
-    async def get_scope_genres(
-            self, sort: str = '', filter: str = '', page: int = 20, number: int = 0, query: str = None
-    ) -> Optional[Genre]:
-        genres = await self._get_scope_genres_from_elastic(page=page, number=number, query=query, sort=sort)
-        return genres
-
-    async def _get_scope_genres_from_elastic(self, page: int = 20, number: int = 0, query: str = None) -> Optional[
-        Genre]:
-        try:
-            if query:
-                doc = await self.elastic.search(index="movies", from_=number, size=page, body={
-                    "query": {
-                        "multi_match": {
-                            "query": f"{query}",
-                            "fuzziness": "auto"
-                        }
-                    }
-                }, )
-            else:
-                doc = await self.elastic.search(
-                    index='movies',
-                    from_=number,
-                    size=page,
-                    sort='imdb_rating:desc',
-                    body={
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {
-                                        "term": {
-                                            "genre.id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff"
-                                        }
-                                    },
-                                    {
-                                        "term": {
-                                            "genre.name": "action"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                )
-        except NotFoundError:
-            return None
+    async def get_genres_list(self) -> List[Genre]:
+        """Возвращает список всех жанров."""
         genres = []
-        for hit in doc['hits']['hits']:
-            genres.append(Genre(**hit["_source"]))
+        try:
+            docs = await self.elastic.search(
+                index=self.es_index,
+                body={
+                    "size": 10000,
+                    "query": {
+                        'match_all': {}
+                    },
+                },
+            )
+            genre_docs = docs['hits']['hits']
+            for genre_doc in genre_docs:
+                genres.append(Genre(**genre_doc['_source']))
+        except NotFoundError:
+            pass
+
         return genres
 
     async def get_by_id(self, genre_id: str) -> Optional[Genre]:
