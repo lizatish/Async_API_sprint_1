@@ -1,6 +1,5 @@
 from typing import Iterator
 
-from services.etl.common.models.main import RoleType
 from services.etl.common.models.utils_sql import MergeResult
 
 
@@ -30,12 +29,14 @@ class Transform(object):
                         'imdb_rating': doc.film_work_rating,
                         'title': doc.film_work_title,
                         'description': doc.film_work_description,
-                        'genre': [doc.genre_name],
-                        'director': [],
-                        'actors_names': [],
-                        'writers_names': [],
+                        'genres': [],
+                        'genres_names': [],
+                        'directors': [],
+                        'directors_names': [],
                         'actors': [],
+                        'actors_names': [],
                         'writers': [],
+                        'writers_names': [],
                     }
                 else:
                     es_doc = self.base_dict[doc.film_work_id]
@@ -46,16 +47,17 @@ class Transform(object):
                         'description': doc.film_work_description,
                     }
 
-                es_doc = self.add_addition_info(doc, es_doc)
+                es_person_enrich_doc = self.add_addition_person_info(doc, es_doc)
+                es_ready_doc = self.add_addition_genres_info(doc, es_person_enrich_doc)
 
-                self.base_dict[doc.film_work_id] = es_doc
+                self.base_dict[doc.film_work_id] = es_ready_doc
 
-    def add_addition_info(
+    def add_addition_person_info(
             self,
             doc: MergeResult,
             output_doc: dict,
     ) -> dict:
-        """Обогащает документы эластика дополнительными данными.
+        """Обогащает документы эластика дополнительными данными по персонам.
 
         Args:
             doc: Обогащающие документы
@@ -64,11 +66,8 @@ class Transform(object):
         Returns:
             dict: Обогащенный словарь для elastic
         """
-        not_main_roles = [RoleType.actor, RoleType.writer]
-        if doc.pfw_role == RoleType.director:
-            if doc.person_full_name not in output_doc[doc.pfw_role]:
-                output_doc[doc.pfw_role].append(doc.person_full_name)
-        elif doc.pfw_role in not_main_roles:
+
+        if doc.pfw_role:
             role_case_name = f'{doc.pfw_role}s'
             names_case_name = f'{role_case_name}_names'
 
@@ -77,10 +76,36 @@ class Transform(object):
                     doc.person_full_name,
                 )
 
-                output_doc[role_case_name].append(
-                    {
-                        'id': doc.person_id,
-                        'name': doc.person_full_name,
-                    },
-                )
+            output_doc[role_case_name].append(
+                {
+                    'id': doc.person_id,
+                    'name': doc.person_full_name,
+                },
+            )
+        return output_doc
+
+    def add_addition_genres_info(
+            self,
+            doc: MergeResult,
+            output_doc: dict,
+    ) -> dict:
+        """Обогащает документы эластика дополнительными данными по жанрам.
+
+        Args:
+            doc: Обогащающие документы
+            output_doc: Результирующие документы
+
+        Returns:
+            dict: Обогащенный словарь для elastic
+        """
+        output_doc['genres'].append(
+            {
+                'id': doc.genre_id,
+                'name': doc.genre_name,
+            },
+        )
+        output_doc['genres_names'].append(
+            doc.genre_name,
+        )
+
         return output_doc
