@@ -5,11 +5,8 @@
       "id": {
         "type": "keyword"
       },
-      "name": {
-        "type": "keyword"
-      },
-      "description": {
-        "type": "text",
+      "full_name": {
+        "type": "keyword",
         "analyzer": "ru_en"
       }
     }

@@ -1,6 +1,6 @@
 from psycopg2.extensions import connection as pg_connection
 
-from services.etl.common.components.base_producer import BaseProducer
+from services.etl.common.components.base import BaseProducer
 from services.etl.common.models.main import Person, FilmWork, Genre
 
 

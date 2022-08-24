@@ -2,14 +2,14 @@ from elasticsearch import Elasticsearch
 from psycopg2.extensions import connection as pg_connection
 
 from services.etl.common.components.elasticsearch_loader import ElasticsearchLoader
-from services.etl.common.components.producer import GenreProducer
+from services.etl.common.components.producer import PersonProducer
 from services.etl.common.postgres_utils import create_pg_connection
 from services.etl.common.state import State, JsonFileStorage
-from services.etl.genres.settings import conf
-from services.etl.genres.transform import Transform
+from services.etl.persons.settings import conf
+from services.etl.persons.transform import Transform
 
 
-def run_genres_etl(
+def run_persons_etl(
         es: Elasticsearch,
         pg_conn: pg_connection,
         batch_size: int,
@@ -23,7 +23,7 @@ def run_genres_etl(
         batch_size: Размер батча
         state: Хранилище состояния
     """
-    producer = GenreProducer(pg_conn)
+    producer = PersonProducer(pg_conn)
     transform = Transform()
     elastic_saver = ElasticsearchLoader(es, conf.elastic_index_name, conf.index_json_path)
 
@@ -61,7 +61,7 @@ def main():
     es = Elasticsearch(conf.elastic_url)
     with pg_conn:
         while True:
-            run_genres_etl(es, pg_conn, portion_size, state)
+            run_persons_etl(es, pg_conn, portion_size, state)
     pg_conn.close()
 
 
