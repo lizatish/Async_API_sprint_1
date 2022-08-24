@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -28,6 +28,31 @@ class PersonService:
         if not person:
             person = await self._get_person_from_elastic(person_id)
         return person
+
+    async def search_person(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
+        persons = await self._search_person_from_elastic(query=query, from_=from_, size=size)
+        if not persons:
+            return None
+        return persons
+
+    async def _search_person_from_elastic(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
+        try:
+            doc = await self.elastic.search(
+                index=self.es_index,
+                from_=from_,
+                size=size,
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": f"{query}",
+                            "fuzziness": "auto"
+                        }
+                    }
+                },
+            )
+        except NotFoundError:
+            return None
+        return [Person(**hit["_source"]) for hit in doc['hits']['hits']]
 
     async def enrich_person_data(self, main_person_info: Person, fw_person_info: Person):
         person = main_person_info.copy()
