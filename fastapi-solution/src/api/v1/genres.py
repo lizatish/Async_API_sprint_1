@@ -2,24 +2,24 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-#
-# from services.film import FilmService, get_film_service
-#
-# router = APIRouter()
-#
-#
-# class Genre(BaseModel):
-#     """Модель фильма для ответа пользователю."""
-#
-#     id: str
-#     title: str
-#
-#
-# @router.get('/{film_id}', response_model=Film)
-# async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
-#     """Возвращает подробную информацию о фильме."""
-#     film = await film_service.get_by_id(film_id)
-#     if not film:
-#         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
-#
-#     return Film(id=film.id, title=film.title)
+
+from services.genre_service import GenreService, get_genre_service
+
+router = APIRouter()
+
+
+class Genre(BaseModel):
+    """Модель жанра для ответа пользователю."""
+
+    uuid: str
+    name: str
+
+
+@router.get('/{genre_id}', response_model=Genre)
+async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
+    """Возвращает подробную информацию о жанре."""
+    genre = await genre_service.get_by_id(genre_id)
+    if not genre:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
+
+    return Genre(uuid=genre.id, name=genre.name)

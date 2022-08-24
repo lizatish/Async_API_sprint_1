@@ -1,7 +1,20 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
+
+from pydantic import BaseModel, Field
 
 from models.common import UUIDMixin
-from models.person import Person
+
+
+class PersonFilm(BaseModel):
+    role: Literal['actor', 'writer', 'director']
+    film_ids: List[str]
+
+
+class Person(UUIDMixin):
+    """Модель персонажа."""
+
+    full_name: str = Field(..., alias='name')
+    films: List[Optional[PersonFilm]] = []
 
 
 class Genre(UUIDMixin):
