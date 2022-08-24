@@ -6,6 +6,7 @@ from pydantic.dataclasses import dataclass
 
 FilmWorkId = str
 PersonId = str
+GenreId = str
 
 
 @dataclass(frozen=True)
@@ -27,7 +28,7 @@ class FilmWork(object):
 class Genre(object):
     """Genre модель."""
 
-    id: str
+    id: GenreId
     name: str
     description: Optional[str]
     created_at: datetime.datetime

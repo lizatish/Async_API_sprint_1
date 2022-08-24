@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic.dataclasses import dataclass
 
-from services.etl.common.models.main import FilmWorkId, PersonId
+from services.etl.common.models.main import FilmWorkId, PersonId, GenreId
 
 
 @dataclass(frozen=True)
@@ -29,3 +29,4 @@ class MergeResult(object):
     person_id: Optional[PersonId]
     person_full_name: Optional[str]
     genre_name: str
+    genre_id: GenreId

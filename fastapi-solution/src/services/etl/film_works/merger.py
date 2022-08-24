@@ -52,6 +52,7 @@ class Merger(BaseExtractor):
                 'p.id',
                 'p.full_name',
                 'g.name',
+                'g.id',
             ]
 
             select_sql_str = ', '.join([f'{select_field} as {model_field_name}'
