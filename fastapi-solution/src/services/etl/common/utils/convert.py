@@ -4,7 +4,7 @@ from typing import Iterator
 import pydantic
 from pydantic.dataclasses import dataclass
 
-from services.film_work_etl.logger import get_logger
+from services.etl.common.logger import get_logger
 
 logger = get_logger()
 

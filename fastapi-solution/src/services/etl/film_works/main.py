@@ -1,17 +1,17 @@
 from elasticsearch import Elasticsearch
 from psycopg2.extensions import connection as pg_connection
 
-from services.film_work_etl.etl.elasticsearch_loader import ElasticsearchLoader
-from services.film_work_etl.etl.enricher import Enricher
-from services.film_work_etl.etl.merger import Merger
-from services.film_work_etl.etl.producer import (
+from services.etl.common.components.elasticsearch_loader import ElasticsearchLoader
+from services.etl.common.postgres_utils import create_pg_connection
+from services.etl.common.state import State, JsonFileStorage
+from services.etl.film_works.enricher import Enricher
+from services.etl.film_works.merger import Merger
+from services.etl.film_works.producer import (
     PersonProducer,
     FilmWorkProducer,
 )
-from services.film_work_etl.etl.transform import Transform
-from services.film_work_etl.postgres_utils import create_pg_connection
-from services.film_work_etl.settings import conf
-from services.film_work_etl.state import State, JsonFileStorage
+from services.etl.film_works.settings import conf
+from services.etl.film_works.transform import Transform
 
 
 def run_film_works_etl(
@@ -31,9 +31,9 @@ def run_film_works_etl(
     producer = FilmWorkProducer(pg_conn)
     merger = Merger(pg_conn)
     transform = Transform()
-    elastic_saver = ElasticsearchLoader(es, conf.elastic_index_name)
+    elastic_saver = ElasticsearchLoader(es, conf.elastic_index_name, conf.index_json_path)
 
-    latest_person_state = state.get_state(conf.film_work_table_name)
+    latest_person_state = state.get_state(conf.table_name)
 
     fw_producer_loader = producer.load_data(batch_size, latest_person_state)
     for fw_batch in fw_producer_loader:
@@ -47,7 +47,7 @@ def run_film_works_etl(
         )
 
         state.set_state(
-            conf.film_work_table_name,
+            conf.table_name,
             fws_list[-1].updated_at.isoformat(),
         )
 
@@ -74,12 +74,12 @@ def run_universal_etl(
     enricher = Enricher(
         m2m_table_name,
         producer_table_name,
-        conf.film_work_table_name,
+        conf.table_name,
         pg_conn,
     )
     merger = Merger(pg_conn)
     transform = Transform()
-    elastic_saver = ElasticsearchLoader(es, conf.elastic_index_name)
+    elastic_saver = ElasticsearchLoader(es, conf.elastic_index_name, conf.index_json_path)
 
     latest_producer_state = state.get_state(producer_table_name)
 
