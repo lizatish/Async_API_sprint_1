@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # Корень проекта
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    # Время хранения данных в кэше
+    FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
     class Config(object):
         """Дополнительные базовые настройки."""
 
