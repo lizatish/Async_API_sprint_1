@@ -14,4 +14,4 @@ class Person(UUIDMixin):
     """Модель персонажа."""
 
     full_name: str = Field(..., alias='name')
-    films: List[Optional[PersonFilm]]
+    films: List[Optional[PersonFilm]] = []
