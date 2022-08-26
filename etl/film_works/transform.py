@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from services.etl.common.models.utils_sql import MergeResult
+from common.models.utils_sql import MergeResult
 
 
 class Transform(object):
