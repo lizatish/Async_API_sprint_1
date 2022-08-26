@@ -1,14 +1,14 @@
 """Описание базового класса ETL-пайплайна по вычитыванию данных из postgres."""
 
 from datetime import datetime
-from typing import Iterator, Optional
+from typing import Iterator, Optional, List
 
 import psycopg2
 from psycopg2.extensions import connection as pg_connection
 from pydantic.dataclasses import dataclass
 
-from services.etl.common.logger import get_logger
-from services.etl.common.utils.convert import convert_sql2models
+from common.logger import get_logger
+from common.utils.convert import convert_sql2models
 
 logger = get_logger()
 
@@ -50,7 +50,7 @@ class BaseExtractor(object):
     def set_values_sql_format(
             self,
             cursor: psycopg2.extensions.cursor,
-            list_values: list[str],
+            list_values: List[str],
     ) -> str:
         """Форматирует кортежи данных для возможности записывать данные пачкой.
 
@@ -83,7 +83,7 @@ class BaseProducer(BaseExtractor):
             self,
             batch_size: int,
             start_from: Optional[datetime],
-    ) -> Iterator[list[dataclass]]:
+    ) -> Iterator[List[dataclass]]:
         """Производит загрузку данных.
 
         Args:

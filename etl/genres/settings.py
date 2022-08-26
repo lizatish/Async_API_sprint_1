@@ -1,4 +1,4 @@
-from services.etl.common.etl_settings import ETLSettings
+from common.etl_settings import ETLSettings
 
 
 class GenresSettings(ETLSettings):
