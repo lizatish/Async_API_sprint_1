@@ -67,6 +67,8 @@ services:
         - elastic
       env_file:
         - .env
-
+      restart: always
+      ports:
+        - "8000:80"
 volumes:
   esdata:
