@@ -9,7 +9,7 @@ class ETLSettings(BaseSettings):
     postgres_db_name: str = 'movies_database'
     postgres_db_user: str = 'app'
     postgres_db_password: str = '123qwe'
-    postgres_db_host: str = '127.0.0.1'
+    postgres_db_host: str = 'postgres'
     postgres_db_port: int = 5432  # noqa: WPS432
 
     data_batch_size: int = 50  # noqa: WPS432

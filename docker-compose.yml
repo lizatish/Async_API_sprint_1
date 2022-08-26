@@ -28,12 +28,12 @@ services:
       - ../data/redis:/data
     restart: always
 
-#  etl_pipeline:
-#      build: .
-#      depends_on:
-#        - postgres
-#        - elastic
-#      env_file:
-#        - .env
+  etl_pipeline:
+      build: etl/
+      depends_on:
+        - postgres
+        - elastic
+      env_file:
+        - .env
 volumes:
   esdata:
