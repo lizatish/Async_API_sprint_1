@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Время хранения данных в кэше
-    FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
+    FILM_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('FILM_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
+    GENRE_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('GENRE_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
+    PERSON_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('PERSON_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
 
     class Config(object):
         """Дополнительные базовые настройки."""

@@ -3,14 +3,14 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from schemas.schemas import Film, ShortFilm
-from services.film import FilmService, get_film_service
-from .utils import get_filter, get_page
+from api.v1.schemas import ShortFilm, Film
+from api.v1.utils import get_page, get_filter
+from services.films import FilmService, get_film_service
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", response_model=List[ShortFilm])
 async def films_scope(
         page: dict = Depends(get_page),
         film_service: FilmService = Depends(get_film_service),
@@ -26,18 +26,18 @@ async def films_scope(
             status_code=HTTPStatus.NOT_FOUND, detail='film not found'
         )
     return [ShortFilm(
-        uuid=item.uuid,
+        uuid=item.id,
         title=item.title,
         imdb_rating=item.imdb_rating
     ) for item in films]
 
 
-@router.get("/search")
+@router.get("/search", response_model=List[ShortFilm])
 async def film_search(
         query: str,
         film_service: FilmService = Depends(get_film_service),
         page: dict = Depends(get_page),
-) -> List[Film]:
+) -> List[ShortFilm]:
     """API для поиска фильма."""
     films = await film_service.search_film(
         from_=page['from'], size=page['size'], query=query
@@ -47,7 +47,7 @@ async def film_search(
             status_code=HTTPStatus.NOT_FOUND, detail='film not found'
         )
     return [ShortFilm(
-        uuid=item.uuid,
+        uuid=item.id,
         title=item.title,
         imdb_rating=item.imdb_rating
     ) for item in films]
@@ -64,7 +64,7 @@ async def film_details(
             status_code=HTTPStatus.NOT_FOUND, detail='film not found'
         )
     result = Film(
-        uuid=film.uuid,
+        uuid=film.id,
         title=film.title,
         imdb_rating=film.imdb_rating,
         description=film.description,
