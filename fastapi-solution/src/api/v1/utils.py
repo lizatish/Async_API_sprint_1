@@ -27,7 +27,7 @@ def validate_filter_values(filter_):
     filter_nested_values = FilterNestedValues.get_values()
     filter_simple_values = FilterSimpleValues.get_values()
 
-    for key, val in filter_:
+    for key, val in filter_.items():
         if key in filter_nested_values or key in filter_simple_values:
             result_filter[key] = val
 

@@ -1,3 +1,4 @@
+import logging
 from functools import lru_cache
 from typing import Optional, List
 
@@ -149,8 +150,7 @@ class FilmService:
                             }
                         )
                     elif key in filter_simple_values:
-                        pass
-
+                        body.append({"match": {f"{key}": f"{filter_[key]}"}})
 
                 doc = await self.elastic.search(
                     index=self.es_index,
