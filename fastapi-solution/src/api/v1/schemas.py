@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Genre(BaseModel):
@@ -10,7 +10,7 @@ class Genre(BaseModel):
     name: str
 
 
-class Persons(BaseModel):
+class Person(BaseModel):
     """Схема персоны."""
 
     uuid: str
@@ -24,10 +24,10 @@ class Film(BaseModel):
     title: str
     imdb_rating: float
     description: Optional[str]
-    genre: List[Genre] = []
-    actors: List[Persons] = []
-    writers: List[Persons] = []
-    directors: List[Persons] = []
+    genres: List[Genre] = []
+    actors: List[Person] = []
+    writers: List[Person] = []
+    directors: List[Person] = []
 
 
 class ShortFilm(BaseModel):

@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from api.v1.schemas import ShortFilm, Film
+from api.v1.schemas import ShortFilm, Film, Person, Genre
 from api.v1.utils import get_page, get_filter
 from services.films import FilmService, get_film_service
 
@@ -68,9 +68,9 @@ async def film_details(
         title=film.title,
         imdb_rating=film.imdb_rating,
         description=film.description,
-        genre=film.genre,
-        actors=film.actors,
-        writers=film.writers,
-        directors=film.directors
+        genres=[Genre(uuid=genre.id, name=genre.name) for genre in film.genres],
+        actors=[Person(uuid=person.id, full_name=person.full_name) for person in film.actors],
+        writers=[Person(uuid=person.id, full_name=person.full_name) for person in film.writers],
+        directors=[Person(uuid=person.id, full_name=person.full_name) for person in film.directors],
     )
     return result

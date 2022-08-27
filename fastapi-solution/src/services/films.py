@@ -27,7 +27,7 @@ class FilmService:
         """Функция для получения фильма по id."""
         film = await self._film_from_cache(film_id)
         if not film:
-            film = await self._get_film_from_elastic(film_id)
+        film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
             await self._put_film_to_cache(film)
@@ -177,7 +177,7 @@ class FilmService:
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         """Функция для поиска фильма в elasticsearch по id."""
         try:
-            doc = await self.elastic.get(self.es_index, film_id)
+            doc = await self.elastic.get(index=self.es_index, id=film_id)
         except NotFoundError:
             return None
         return Film(**doc['_source'])
