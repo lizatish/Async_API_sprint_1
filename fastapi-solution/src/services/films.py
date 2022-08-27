@@ -8,6 +8,7 @@ from fastapi import Depends
 from core.config import conf
 from db.elastic import get_elastic
 from db.redis import get_redis
+from models.common import FilterSimpleValues, FilterNestedValues
 from models.main import Film, Person, PersonFilm
 
 
@@ -37,7 +38,7 @@ class FilmService:
     ) -> Optional[List[Film]]:
         """Функция для получения списка фильмов."""
         films = await self._get_scope_films_from_elastic(
-            from_=from_, size=size, sort=sort, filter=filter
+            from_=from_, size=size, sort=sort, filter_=filter
         )
         if not films:
             return None
@@ -118,29 +119,39 @@ class FilmService:
         return [Film(**hit["_source"]) for hit in doc['hits']['hits']]
 
     async def _get_scope_films_from_elastic(
-            self, from_: int, size: int, filter: dict, sort: str
+            self, from_: int, size: int, filter_: dict, sort: str
     ) -> Optional[List[Film]]:
         """Функция для поиска фильмов в elasticsearch в соот. фильтрам."""
         try:
-            if filter:
-                body = [
-                    {
-                        "nested": {
-                            "path": f"{key}",
-                            "query": {
-                                "bool": {
-                                    "must": [
-                                        {
-                                            "match": {
-                                                f"{key}.id": f"{filter[key]}"
-                                            }
+            if filter_:
+
+                filter_nested_values = FilterNestedValues.get_values()
+                filter_simple_values = FilterSimpleValues.get_values()
+                body = []
+                for key in filter_:
+                    if key in filter_nested_values:
+                        body.append(
+                            {
+                                "nested": {
+                                    "path": f"{key}",
+                                    "query": {
+                                        "bool": {
+                                            "must": [
+                                                {
+                                                    "match": {
+                                                        f"{key}.id": f"{filter_[key]}"
+                                                    }
+                                                }
+                                            ]
                                         }
-                                    ]
+                                    }
                                 }
                             }
-                        }
-                    } for key in filter
-                ]
+                        )
+                    elif key in filter_simple_values:
+                        pass
+
+
                 doc = await self.elastic.search(
                     index=self.es_index,
                     from_=from_,
