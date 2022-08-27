@@ -75,12 +75,12 @@ class Transform(object):
                     doc.person_full_name,
                 )
 
-            output_doc[role_case_name].append(
-                {
-                    'id': doc.person_id,
-                    'name': doc.person_full_name,
-                },
-            )
+            role_data = {
+                'id': doc.person_id,
+                'name': doc.person_full_name,
+            }
+            if role_data not in output_doc[role_case_name]:
+                output_doc[role_case_name].append(role_data)
         return output_doc
 
     def add_addition_genres_info(
@@ -97,14 +97,16 @@ class Transform(object):
         Returns:
             dict: Обогащенный словарь для elastic
         """
-        output_doc['genres'].append(
-            {
-                'id': doc.genre_id,
-                'name': doc.genre_name,
-            },
-        )
-        output_doc['genres_names'].append(
-            doc.genre_name,
-        )
+        genre_data = {
+            'id': doc.genre_id,
+            'name': doc.genre_name,
+        }
+        if genre_data not in output_doc['genres']:
+            output_doc['genres'].append(genre_data)
+
+        if doc.genre_name not in output_doc['genres_names']:
+            output_doc['genres_names'].append(
+                doc.genre_name,
+            )
 
         return output_doc
