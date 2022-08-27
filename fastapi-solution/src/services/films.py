@@ -1,4 +1,3 @@
-import logging
 from functools import lru_cache
 from typing import Optional, List
 
@@ -72,7 +71,7 @@ class FilmService:
         """Возвращает персону по идентификатору."""
         person = await self._person_from_cache(person_id)
         if not person:
-            person = await self._get_person_from_elastic(person_id)
+        person = await self._get_person_from_elastic(person_id)
         return person
 
     async def get_person_by_ids(self, person_ids: List[str]) -> List[Person]:
@@ -207,9 +206,9 @@ class FilmService:
     async def _prepare_person(self, person_id: str, docs: dict) -> Person:
         """Подготавливает полные данные по персоне и возвращает их."""
         person = None
+        persons_roles = {}
         for doc in docs['hits']['hits']:
             source = doc['_source']
-            persons_roles = {}
 
             for role in self.person_roles:
                 dirty_person_roles = list(filter(lambda x: x['id'] == person_id, source[role]))
@@ -227,15 +226,16 @@ class FilmService:
                 else:
                     persons_roles[role]['fw_ids'].append(source['id'])
 
-            for role, role_data in persons_roles.items():
-                person_film = PersonFilm(role=role[:-1], film_ids=role_data['fw_ids'])
-                if not person:
-                    person = Person(
-                        id=role_data['id'],
-                        full_name=role_data['full_name'],
-                        films=[person_film])
-                else:
-                    person.films.append(person_film)
+        for role, role_data in persons_roles.items():
+            person_film = PersonFilm(role=role[:-1], film_ids=role_data['fw_ids'])
+            if not person:
+                person = Person(
+                    id=role_data['id'],
+                    full_name=role_data['full_name'],
+                    films=[person_film])
+            else:
+                person.films.append(person_film)
+
         return person
 
     async def _get_by_person_ids_from_elastic(self, person_ids: List[str]) -> dict:
