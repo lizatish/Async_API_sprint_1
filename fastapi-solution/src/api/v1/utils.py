@@ -6,9 +6,7 @@ from models.common import FilterSimpleValues, FilterNestedValues
 
 
 def get_page(req: Request) -> dict:
-    """Функция преобразует данные для пагинации из запроса
-    к необходимому виду.
-    """
+    """Функция преобразует данные для пагинации из запроса к необходимому виду."""
     number = req.query_params.get('page[number]')
     size = req.query_params.get('page[size]')
     if number and size:
@@ -16,12 +14,13 @@ def get_page(req: Request) -> dict:
     else:
         from_ = 0
     return {
-        "size": int(size) if size else 5,
-        "from": from_
+        'size': int(size) if size else 5,
+        'from': from_,
     }
 
 
-def validate_filter_values(filter_):
+def validate_filter_values(filter_: dict) -> dict:
+    """Валидирует фильтр запроса."""
     result_filter = {}
 
     filter_nested_values = FilterNestedValues.get_values()
@@ -35,9 +34,7 @@ def validate_filter_values(filter_):
 
 
 def get_filter(req: Request) -> dict:
-    """Функция преобразует данные для фильтрации из запроса
-    к необходимому виду.
-    """
+    """Функция преобразует данные для фильтрации из запроса  к необходимому виду."""
     filter_ = {}
     for key, value in req.query_params.items():
         if re.match('^filter\[[a-zA-Z_]{0,25}\]$', key) is not None:

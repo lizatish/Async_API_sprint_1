@@ -10,58 +10,58 @@ from services.films import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get("/", response_model=List[ShortFilm])
+@router.get('/', response_model=List[ShortFilm])
 async def films_scope(
         page: dict = Depends(get_page),
         film_service: FilmService = Depends(get_film_service),
         filter: dict = Depends(get_filter),
         sort: str = Query(default='-imdb_rating'),
 ) -> List[ShortFilm]:
-    """API для получения списка фильмов в соответствии с фильтрами."""
+    """Возвращает списка фильмов в соответствии с фильтрами."""
     films = await film_service.get_scope_films(
-        from_=page['from'], size=page['size'], filter=filter, sort=sort
+        from_=page['from'], size=page['size'], filter=filter, sort=sort,
     )
     if not films:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='film not found'
+            status_code=HTTPStatus.NOT_FOUND, detail='film not found',
         )
     return [ShortFilm(
         uuid=item.id,
         title=item.title,
-        imdb_rating=item.imdb_rating
+        imdb_rating=item.imdb_rating,
     ) for item in films]
 
 
-@router.get("/search", response_model=List[ShortFilm])
+@router.get('/search', response_model=List[ShortFilm])
 async def film_search(
         query: str,
         film_service: FilmService = Depends(get_film_service),
         page: dict = Depends(get_page),
 ) -> List[ShortFilm]:
-    """API для поиска фильма."""
+    """Возвращает результат поиска фильма."""
     films = await film_service.search_film(
-        from_=page['from'], size=page['size'], query=query
+        from_=page['from'], size=page['size'], query=query,
     )
     if not films:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='film not found'
+            status_code=HTTPStatus.NOT_FOUND, detail='film not found',
         )
     return [ShortFilm(
         uuid=item.id,
         title=item.title,
-        imdb_rating=item.imdb_rating
+        imdb_rating=item.imdb_rating,
     ) for item in films]
 
 
 @router.get('/{film_id}', response_model=Film)
 async def film_details(
-        film_id: str, film_service: FilmService = Depends(get_film_service)
+        film_id: str, film_service: FilmService = Depends(get_film_service),
 ) -> Film:
-    """API для поиска фильма по id."""
+    """Ищет фильм по id."""
     film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='film not found'
+            status_code=HTTPStatus.NOT_FOUND, detail='film not found',
         )
     result = Film(
         uuid=film.id,

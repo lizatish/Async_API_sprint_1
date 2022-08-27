@@ -34,22 +34,22 @@ class FilmService:
         return film
 
     async def get_scope_films(
-            self, from_: int, size: int, filter: dict, sort: str
+            self, from_: int, size: int, filter: dict, sort: str,
     ) -> Optional[List[Film]]:
         """Функция для получения списка фильмов."""
         films = await self._get_scope_films_from_elastic(
-            from_=from_, size=size, sort=sort, filter_=filter
+            from_=from_, size=size, sort=sort, filter_=filter,
         )
         if not films:
             return None
         return films
 
     async def search_film(
-            self, query: str, from_: int, size: int
+            self, query: str, from_: int, size: int,
     ) -> Optional[List[Film]]:
         """Функция для поиска фильма."""
         films = await self._search_film_from_elastic(
-            query=query, from_=from_, size=size
+            query=query, from_=from_, size=size,
         )
         if not films:
             return None
@@ -71,7 +71,7 @@ class FilmService:
         """Возвращает персону по идентификатору."""
         person = await self._person_from_cache(person_id)
         if not person:
-        person = await self._get_person_from_elastic(person_id)
+            person = await self._get_person_from_elastic(person_id)
         return person
 
     async def get_person_by_ids(self, person_ids: List[str]) -> List[Person]:
@@ -97,7 +97,7 @@ class FilmService:
         return person
 
     async def _search_film_from_elastic(
-            self, query: str, from_: int, size: int
+            self, query: str, from_: int, size: int,
     ) -> Optional[List[Film]]:
         """Функция для поиска фильма в elasticsearch."""
         try:
@@ -106,20 +106,20 @@ class FilmService:
                 from_=from_,
                 size=size,
                 body={
-                    "query": {
-                        "multi_match": {
-                            "query": f"{query}",
-                            "fuzziness": "auto"
-                        }
-                    }
-                }
+                    'query': {
+                        'multi_match': {
+                            'query': f'{query}',
+                            'fuzziness': 'auto',
+                        },
+                    },
+                },
             )
         except NotFoundError:
             return None
-        return [Film(**hit["_source"]) for hit in doc['hits']['hits']]
+        return [Film(**hit['_source']) for hit in doc['hits']['hits']]
 
     async def _get_scope_films_from_elastic(
-            self, from_: int, size: int, filter_: dict, sort: str
+            self, from_: int, size: int, filter_: dict, sort: str,
     ) -> Optional[List[Film]]:
         """Функция для поиска фильмов в elasticsearch в соот. фильтрам."""
         try:
@@ -132,24 +132,24 @@ class FilmService:
                     if key in filter_nested_values:
                         body.append(
                             {
-                                "nested": {
-                                    "path": f"{key}",
-                                    "query": {
-                                        "bool": {
-                                            "must": [
+                                'nested': {
+                                    'path': f'{key}',
+                                    'query': {
+                                        'bool': {
+                                            'must': [
                                                 {
-                                                    "match": {
-                                                        f"{key}.id": f"{filter_[key]}"
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
+                                                    'match': {
+                                                        f'{key}.id': f'{filter_[key]}',
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                },
+                            },
                         )
                     elif key in filter_simple_values:
-                        body.append({"match": {f"{key}": f"{filter_[key]}"}})
+                        body.append({'match': {f'{key}': f'{filter_[key]}'}})
 
                 doc = await self.elastic.search(
                     index=self.es_index,
@@ -158,8 +158,8 @@ class FilmService:
                     sort=f'{sort[1:]}:desc' if sort[0] == '-'
                     else f'{sort}:asc',
                     body={
-                        "query": {"bool": {"must": body}}
-                    }
+                        'query': {'bool': {'must': body}},
+                    },
                 )
             else:
                 doc = await self.elastic.search(
@@ -167,11 +167,11 @@ class FilmService:
                     from_=from_,
                     size=size,
                     sort=f'{sort[1:]}:desc' if sort[0] == '-'
-                    else f'{sort}:asc'
+                    else f'{sort}:asc',
                 )
         except NotFoundError:
             return None
-        return [Film(**hit["_source"]) for hit in doc['hits']['hits']]
+        return [Film(**hit['_source']) for hit in doc['hits']['hits']]
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         """Функция для поиска фильма в elasticsearch по id."""
@@ -192,7 +192,7 @@ class FilmService:
     async def _put_film_to_cache(self, film: Film):
         """Функция кладёт фильм по id в кэш."""
         await self.redis.set(
-            film.id, film.json(), expire=conf.FILM_CACHE_EXPIRE_IN_SECONDS
+            film.id, film.json(), expire=conf.FILM_CACHE_EXPIRE_IN_SECONDS,
         )
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
