@@ -24,6 +24,8 @@ def get_page(req: Request) -> dict:
 
 
 class PersonFilm(BaseModel):
+    """Вложенная модель для описания фильмов по персоне."""
+
     role: Literal['actor', 'writer', 'director']
     film_ids: List[str]
 
@@ -38,6 +40,7 @@ class Person(BaseModel):
 
 class FilmByPerson(BaseModel):
     """Модель для представления получения фильмов по персоне."""
+
     uuid: str
     title: str
     imdb_rating: float
@@ -46,6 +49,7 @@ class FilmByPerson(BaseModel):
 @router.get('/{person_id}/film', response_model=List[FilmByPerson])
 async def films_by_person(person_id: str,
                           film_service: FilmService = Depends(get_film_service)) -> List[FilmByPerson]:
+    """Ищет фильмы по персоне."""
     fws_by_person = await film_service.get_films_by_person(person_id)
     if not fws_by_person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
@@ -68,6 +72,7 @@ async def search_persons(
         film_service: FilmService = Depends(get_film_service),
         page: dict = Depends(get_page),
 ) -> List[Person]:
+    """Ищет совпадения по персонам."""
     persons = await person_service.search_person(
         from_=page['from'], size=page['size'], query=query
     )
@@ -76,19 +81,9 @@ async def search_persons(
             status_code=HTTPStatus.NOT_FOUND, detail='film not found'
         )
 
-    person_ids = []
-    for person in persons:
-        person_ids.append(person.id)
-
+    person_ids = [person.id for person in persons]
     fw_person_info = await film_service.get_person_by_ids(person_ids)
-
-    full_persons = []
-    for person_base, person_fw in zip(persons, fw_person_info):
-        if person_fw:
-            full_person = await person_service.enrich_person_data(person_base, person_fw)
-        else:
-            full_person = person_base
-        full_persons.append(full_person)
+    full_persons = await person_service.enrich_persons_list_data(persons, fw_person_info)
 
     result = []
     for person in full_persons:
@@ -106,7 +101,6 @@ async def search_persons(
 async def person_details(person_id: str, person_service: PersonService = Depends(get_person_service),
                          film_service: FilmService = Depends(get_film_service)) -> Person:
     """Возвращает подробную информацию об участнике фильма."""
-
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')

@@ -30,12 +30,14 @@ class PersonService:
         return person
 
     async def search_person(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
+        """Возвращает совпадения по персоне."""
         persons = await self._search_person_from_elastic(query=query, from_=from_, size=size)
         if not persons:
             return None
         return persons
 
     async def _search_person_from_elastic(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
+        """Ищет данные по персоне в индексе персон."""
         try:
             doc = await self.elastic.search(
                 index=self.es_index,
@@ -54,13 +56,15 @@ class PersonService:
             return None
         return [Person(**hit["_source"]) for hit in doc['hits']['hits']]
 
-    async def enrich_person_data(self, main_person_info: Person, fw_person_info: Person):
+    async def enrich_person_data(self, main_person_info: Person, fw_person_info: Person) -> Person:
+        """Обогащает данные по персоне, возвращает полные данные по персоне."""
         person = main_person_info.copy()
         person.films = fw_person_info.films.copy()
         await self._put_person_to_cache(person)
         return person
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
+        """Кладет персону в кеш редиса."""
         data = await self.redis.get(person_id)
         if not data:
             return None
@@ -68,9 +72,11 @@ class PersonService:
         return person
 
     async def _put_person_to_cache(self, person: Person):
+        """Получает персону из кеша редиса."""
         await self.redis.set(person.id, person.json(), expire=PERSON_CACHE_EXPIRE_IN_SECONDS)
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
+        """Возвращает персону из эластика."""
         person = None
         try:
             docs = await self.elastic.search(
@@ -96,6 +102,17 @@ class PersonService:
             pass
 
         return person
+
+    async def enrich_persons_list_data(self, persons: list[Person], fw_person_info: list[Person]) -> list[Person]:
+        """Возвращает полный список персон с расширенными данными."""
+        full_persons = []
+        for person_base, person_fw in zip(persons, fw_person_info):
+            if person_fw:
+                full_person = await self.enrich_person_data(person_base, person_fw)
+            else:
+                full_person = person_base
+            full_persons.append(full_person)
+        return full_persons
 
 
 @lru_cache()
