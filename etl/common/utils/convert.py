@@ -1,18 +1,18 @@
 """Модуль конвертации данных."""
-from typing import Iterator
+from typing import Iterator, List
 
 import pydantic
 from pydantic.dataclasses import dataclass
 
-from services.etl.common.logger import get_logger
+from common.logger import get_logger
 
 logger = get_logger()
 
 
 def convert_sql2models(
         class_type: dataclass,
-        column_names: list[str],
-        db_rows: list[tuple],
+        column_names: List[str],
+        db_rows: List[tuple],
 ) -> Iterator[dataclass]:
     """Конвертирует сырые данные из базы в модели dataclass.
 

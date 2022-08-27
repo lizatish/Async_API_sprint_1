@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from services.etl.common.models.main import Person
+from common.models.main import Genre
 
 
 class Transform(object):
@@ -12,7 +12,7 @@ class Transform(object):
 
     def create_documents(
             self,
-            data_generator: Iterator[Person],
+            data_generator: Iterator[Genre],
     ):
         """Строит набор документов для записи в elastic.
 
@@ -24,6 +24,7 @@ class Transform(object):
         for doc in data_generator:
             es_doc = {
                 'id': doc.id,
-                'full_name': doc.full_name,
+                'name': doc.name,
+                'description': doc.description,
             }
             self.base_dict[doc.id] = es_doc

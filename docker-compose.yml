@@ -28,12 +28,47 @@ services:
       - ../data/redis:/data
     restart: always
 
-#  etl_pipeline:
-#      build: .
-#      depends_on:
-#        - postgres
-#        - elastic
-#      env_file:
-#        - .env
+  etl_genres_pipeline:
+      build: 
+        context: etl/
+        dockerfile: genres.Dockerfile
+      depends_on:
+        - postgres
+        - elastic
+      env_file:
+        - .env
+
+  etl_persons_pipeline:
+      build: 
+        context: etl/
+        dockerfile: persons.Dockerfile
+      depends_on:
+        - postgres
+        - elastic
+      env_file:
+        - .env
+
+  etl_filmwork_pipeline:
+      build: 
+        context: etl/
+        dockerfile: film_works.Dockerfile
+      depends_on:
+        - postgres
+        - elastic
+      env_file:
+        - .env
+
+  api_service:
+      build: 
+        context: fastapi-solution/
+        dockerfile: Dockerfile
+      depends_on:
+        - redis
+        - elastic
+      env_file:
+        - .env
+      restart: always
+      ports:
+        - "8000:80"
 volumes:
   esdata:

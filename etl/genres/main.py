@@ -1,12 +1,12 @@
 from elasticsearch import Elasticsearch
 from psycopg2.extensions import connection as pg_connection
 
-from services.etl.common.components.elasticsearch_loader import ElasticsearchLoader
-from services.etl.common.components.producer import GenreProducer
-from services.etl.common.postgres_utils import create_pg_connection
-from services.etl.common.state import State, JsonFileStorage
-from services.etl.genres.settings import conf
-from services.etl.genres.transform import Transform
+from common.components.elasticsearch_loader import ElasticsearchLoader
+from common.components.producer import GenreProducer
+from common.postgres_utils import create_pg_connection
+from common.state import State, JsonFileStorage
+from genres.settings import conf
+from genres.transform import Transform
 
 
 def run_genres_etl(

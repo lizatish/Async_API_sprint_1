@@ -7,7 +7,7 @@ import psycopg2
 from psycopg2.extensions import connection as pg_connection
 from psycopg2.extras import DictCursor
 
-from services.etl.common.logger import get_logger
+from common.logger import get_logger
 
 _TException = typing.TypeVar('_TException', bound=Exception)
 
