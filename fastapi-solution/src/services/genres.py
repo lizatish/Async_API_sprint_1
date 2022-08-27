@@ -21,24 +21,27 @@ class GenreService:
 
         self.es_index = 'genres'
 
-    async def get_genres_list(self) -> List[Genre]:
+    async def get_genres_list(self, url: str) -> List[Genre]:
         """Возвращает список всех жанров."""
-        genres = []
-        try:
-            docs = await self.elastic.search(
-                index=self.es_index,
-                body={
-                    'size': 10000,
-                    'query': {
-                        'match_all': {},
+        genres = await self._genres_from_cache(url)
+        if not genres:
+            genres = []
+            try:
+                docs = await self.elastic.search(
+                    index=self.es_index,
+                    body={
+                        'size': 10000,
+                        'query': {
+                            'match_all': {},
+                        },
                     },
-                },
-            )
-            genre_docs = docs['hits']['hits']
-            for genre_doc in genre_docs:
-                genres.append(Genre(**genre_doc['_source']))
-        except NotFoundError:
-            pass
+                )
+                genre_docs = docs['hits']['hits']
+                for genre_doc in genre_docs:
+                    genres.append(Genre(**genre_doc['_source']))
+                await self._put_genres_to_cache(genres, url)
+            except NotFoundError:
+                pass
 
         return genres
 
@@ -91,6 +94,23 @@ class GenreService:
 
     async def _put_genre_to_cache(self, genre: Genre):
         await self.redis.set(genre.id, genre.json(), expire=conf.GENRE_CACHE_EXPIRE_IN_SECONDS)
+
+
+    async def _genres_from_cache(self, url: str):
+        """Функция отдаёт список жанров если они есть в кэше."""
+        data = await self.redis.lrange(url, 0, -1)
+        if not data:
+            return None
+        genres = [Genre.parse_raw(item) for item in data]
+        return reversed(genres)
+
+    async def _put_genres_to_cache(self, genres: List[Genre], url: str):
+        """Функция кладёт список жанров в кэш."""
+        data = [item.json() for item in genres]
+        await self.redis.lpush(
+            url, *data
+        )
+        await self.redis.expire(url, GENRE_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()

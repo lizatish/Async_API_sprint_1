@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from api.v1.schemas import ShortFilm, Film, Person, Genre
 from api.v1.utils import get_page, get_filter
@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.get('/', response_model=List[ShortFilm])
 async def films_scope(
+        request: Request,
         page: dict = Depends(get_page),
         film_service: FilmService = Depends(get_film_service),
         filter: dict = Depends(get_filter),
@@ -19,7 +20,7 @@ async def films_scope(
 ) -> List[ShortFilm]:
     """Возвращает списка фильмов в соответствии с фильтрами."""
     films = await film_service.get_scope_films(
-        from_=page['from'], size=page['size'], filter=filter, sort=sort,
+        from_=page['from'], size=page['size'], filter=filter, sort=sort, url=request.url._url,
     )
     if not films:
         raise HTTPException(
@@ -34,13 +35,14 @@ async def films_scope(
 
 @router.get('/search', response_model=List[ShortFilm])
 async def film_search(
+        request: Request,
         query: str,
         film_service: FilmService = Depends(get_film_service),
         page: dict = Depends(get_page),
 ) -> List[ShortFilm]:
     """Возвращает результат поиска фильма."""
     films = await film_service.search_film(
-        from_=page['from'], size=page['size'], query=query,
+        from_=page['from'], size=page['size'], query=query, url=request.url._url,
     )
     if not films:
         raise HTTPException(
