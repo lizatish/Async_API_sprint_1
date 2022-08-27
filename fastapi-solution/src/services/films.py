@@ -28,7 +28,7 @@ class FilmService:
         """Функция для получения фильма по id."""
         film = await self._film_from_cache(film_id)
         if not film:
-        film = await self._get_film_from_elastic(film_id)
+            film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
             await self._put_film_to_cache(film)
@@ -238,7 +238,7 @@ class FilmService:
                     person.films.append(person_film)
         return person
 
-    async def _get_by_person_ids_from_elastic(self, person_ids: list[str]) -> dict:
+    async def _get_by_person_ids_from_elastic(self, person_ids: List[str]) -> dict:
         """Возвращает результат запроса к elastic для поиска персон."""
         return await self.elastic.search(
             index=self.es_index,

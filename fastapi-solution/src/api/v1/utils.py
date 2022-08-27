@@ -40,7 +40,7 @@ def get_filter(req: Request) -> dict:
     """
     filter_ = {}
     for key, value in req.query_params.items():
-        if re.match('^filter\[[a-zA-Z]{0,25}\]$', key) is not None:
+        if re.match('^filter\[[a-zA-Z_]{0,25}\]$', key) is not None:
             filter_[key.replace('filter[', '').replace(']', '')] = value
 
     return validate_filter_values(filter_)

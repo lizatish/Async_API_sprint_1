@@ -103,7 +103,7 @@ class PersonService:
 
         return person
 
-    async def enrich_persons_list_data(self, persons: list[Person], fw_person_info: list[Person]) -> list[Person]:
+    async def enrich_persons_list_data(self, persons: List[Person], fw_person_info: List[Person]) -> List[Person]:
         """Возвращает полный список персон с расширенными данными."""
         full_persons = []
         for person_base, person_fw in zip(persons, fw_person_info):
