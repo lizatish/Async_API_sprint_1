@@ -48,7 +48,7 @@ class FilmService:
         return films
 
     async def search_film(
-            self, query: str, from_: int, size: int, url: str
+            self, query: str, from_: int, size: int, url: str,
     ) -> Optional[List[Film]]:
         """Функция для поиска фильма."""
         films = await self._films_from_cache(url)
@@ -309,7 +309,7 @@ class FilmService:
         """Функция кладёт список фильмов в кэш."""
         data = [item.json() for item in films]
         await self.redis.lpush(
-            url, *data
+            url, *data,
         )
         await self.redis.expire(url, conf.FILM_CACHE_EXPIRE_IN_SECONDS)
 
@@ -325,13 +325,14 @@ class FilmService:
         """Функция кладёт список персон в кэш."""
         data = [item.json() for item in persons]
         await self.redis.lpush(
-            url, *data
+            url, *data,
         )
         await self.redis.expire(url, conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
     async def _put_person_to_cache(self, person: Person):
         """Получает персону из кеша редиса."""
         await self.redis.set(f'info_{person.id}', person.json(), expire=conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
+
 
 @lru_cache()
 def get_film_service(

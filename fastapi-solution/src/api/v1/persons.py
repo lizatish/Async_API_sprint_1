@@ -63,7 +63,7 @@ async def search_persons(
 ) -> List[Person]:
     """Ищет совпадения по персонам."""
     persons = await person_service.search_person(
-        from_=page['from'], size=page['size'], query=query, url=request.url._url
+        from_=page['from'], size=page['size'], query=query, url=request.url._url,
     )
     if not persons:
         raise HTTPException(

@@ -95,7 +95,6 @@ class GenreService:
     async def _put_genre_to_cache(self, genre: Genre):
         await self.redis.set(genre.id, genre.json(), expire=conf.GENRE_CACHE_EXPIRE_IN_SECONDS)
 
-
     async def _genres_from_cache(self, url: str):
         """Функция отдаёт список жанров если они есть в кэше."""
         data = await self.redis.lrange(url, 0, -1)
@@ -108,9 +107,9 @@ class GenreService:
         """Функция кладёт список жанров в кэш."""
         data = [item.json() for item in genres]
         await self.redis.lpush(
-            url, *data
+            url, *data,
         )
-        await self.redis.expire(url, GENRE_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.expire(url, conf.GENRE_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()

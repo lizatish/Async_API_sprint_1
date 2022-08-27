@@ -26,9 +26,9 @@ class PersonService:
         person = await self._person_from_cache(person_id)
         if not person:
             person = await self._get_person_from_elastic(person_id)
-            if not person: 
+            if not person:
                 return None
-            await self._put_person_to_cache(person)      
+            await self._put_person_to_cache(person)
         return person
 
     async def search_person(self, query: str, from_: int, size: int, url: str) -> Optional[List[Person]]:
@@ -36,7 +36,7 @@ class PersonService:
         persons = await self._persons_from_cache(url)
         if not persons:
             persons = await self._search_person_from_elastic(query=query, from_=from_, size=size)
-            if not persons: 
+            if not persons:
                 return None
             await self._put_persons_to_cache(persons, url)
         return persons
@@ -70,7 +70,6 @@ class PersonService:
             await self._put_enriched_person_to_cache(person)
         return person
 
-
     async def _enriched_person_from_cache(self, person_id: str) -> Optional[Person]:
         """Получает персону из кеша редиса."""
         data = await self.redis.get(f'enriched_{person_id}')
@@ -81,8 +80,7 @@ class PersonService:
 
     async def _put_enriched_person_to_cache(self, person: Person):
         """Кладет персону в кеш редиса."""
-        await self.redis.set(f'enriched_{person.id}', person.json(), expire=PERSON_CACHE_EXPIRE_IN_SECONDS)
-
+        await self.redis.set(f'enriched_{person.id}', person.json(), expire=conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
         """Кладет персону в кеш редиса."""
@@ -147,9 +145,10 @@ class PersonService:
         """Функция кладёт список персон в кэш."""
         data = [item.json() for item in persons]
         await self.redis.lpush(
-            url, *data
+            url, *data,
         )
-        await self.redis.expire(url, PERSON_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.expire(url, conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
+
 
 @lru_cache()
 def get_person_service(

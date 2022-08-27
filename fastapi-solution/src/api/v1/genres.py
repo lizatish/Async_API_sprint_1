@@ -29,7 +29,7 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
 @router.get('/', response_model=List[Genre])
 async def genres_list(
         request: Request,
-        genre_service: GenreService = Depends(get_genre_service)
+        genre_service: GenreService = Depends(get_genre_service),
 ) -> List[Genre]:
     """Возвращает список жанров."""
     genres_list = await genre_service.get_genres_list(url=request.url._url)
