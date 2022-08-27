@@ -25,22 +25,28 @@ class FilmService:
         self.person_roles = ['writers', 'actors', 'directors']
 
     async def get_scope_films(
-            self, sort: str = '', filter: str = '', page: int = 20, number: int = 0, query: str = None
+            self, sort: str = '', filter: str = '', page: int = 20, number: int = 0, query: str = None,
     ) -> Optional[Film]:
+        """Возвращает список фильмов."""
         films = await self._get_scope_films_from_elastic(page=page, number=number, query=query, sort=sort)
         return films
 
     async def _get_scope_films_from_elastic(self, page: int = 20, number: int = 0, query: str = None) -> Optional[Film]:
         try:
             if query:
-                doc = await self.elastic.search(index="movies", from_=number, size=page, body={
-                    "query": {
-                        "multi_match": {
-                            "query": f"{query}",
-                            "fuzziness": "auto"
-                        }
-                    }
-                }, )
+                doc = await self.elastic.search(
+                    index='movies',
+                    from_=number,
+                    size=page,
+                    body={
+                        'query': {
+                            'multi_match': {
+                                'query': f'{query}',
+                                'fuzziness': 'auto',
+                            },
+                        },
+                    },
+                )
             else:
                 doc = await self.elastic.search(
                     index='movies',
@@ -48,29 +54,29 @@ class FilmService:
                     size=page,
                     sort='imdb_rating:desc',
                     body={
-                        "query": {
-                            "bool": {
-                                "must": [
+                        'query': {
+                            'bool': {
+                                'must': [
                                     {
-                                        "term": {
-                                            "genre.id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff"
-                                        }
+                                        'term': {
+                                            'genre.id': '3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff',
+                                        },
                                     },
                                     {
-                                        "term": {
-                                            "genre.name": "action"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
+                                        'term': {
+                                            'genre.name': 'action',
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
                 )
         except NotFoundError:
             return None
         films = []
         for hit in doc['hits']['hits']:
-            films.append(Film(**hit["_source"]))
+            films.append(Film(**hit['_source']))
         return films
 
     async def get_by_id(self, film_id: str) -> Optional[Film]:
@@ -169,7 +175,7 @@ class FilmService:
                     persons_roles[role] = {
                         'id': person_id,
                         'full_name': person_name,
-                        'fw_ids': [source['id']]
+                        'fw_ids': [source['id']],
                     }
                 else:
                     persons_roles[role]['fw_ids'].append(source['id'])
@@ -190,35 +196,35 @@ class FilmService:
         return await self.elastic.search(
             index=self.es_index,
             body={
-                "query": {
+                'query': {
                     'bool': {
                         'should': [
                             {
-                                "nested": {
-                                    "path": "writers",
-                                    "query": {
-                                        "terms": {
-                                            f"writers.id": person_ids
+                                'nested': {
+                                    'path': 'writers',
+                                    'query': {
+                                        'terms': {
+                                            'writers.id': person_ids,
                                         },
                                     },
-                                }
+                                },
                             },
                             {
-                                "nested": {
-                                    "path": "actors",
-                                    "query": {
-                                        "terms": {
-                                            f"actors.id": person_ids
+                                'nested': {
+                                    'path': 'actors',
+                                    'query': {
+                                        'terms': {
+                                            'actors.id': person_ids,
                                         },
                                     },
-                                }
+                                },
                             },
                             {
-                                "nested": {
-                                    "path": "directors",
-                                    "query": {
-                                        "terms": {
-                                            f"directors.id": person_ids
+                                'nested': {
+                                    'path': 'directors',
+                                    'query': {
+                                        'terms': {
+                                            'directors.id': person_ids,
                                         },
                                     },
                                 },
@@ -226,7 +232,7 @@ class FilmService:
                         ],
                     },
                 },
-            }
+            },
         )
 
 

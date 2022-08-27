@@ -29,9 +29,9 @@ class GenreService:
             docs = await self.elastic.search(
                 index=self.es_index,
                 body={
-                    "size": 10000,
-                    "query": {
-                        'match_all': {}
+                    'size': 10000,
+                    'query': {
+                        'match_all': {},
                     },
                 },
             )
@@ -61,12 +61,12 @@ class GenreService:
             docs = await self.elastic.search(
                 index=self.es_index,
                 body={
-                    "query": {
-                        "bool": {
-                            "must": [
+                    'query': {
+                        'bool': {
+                            'must': [
                                 {
-                                    "match_phrase": {
-                                        "id": genre_id,
+                                    'match_phrase': {
+                                        'id': genre_id,
                                     },
                                 },
                             ],

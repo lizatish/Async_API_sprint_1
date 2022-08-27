@@ -44,17 +44,17 @@ class PersonService:
                 from_=from_,
                 size=size,
                 body={
-                    "query": {
-                        "multi_match": {
-                            "query": f"{query}",
-                            "fuzziness": "auto"
-                        }
-                    }
+                    'query': {
+                        'multi_match': {
+                            'query': f'{query}',
+                            'fuzziness': 'auto',
+                        },
+                    },
                 },
             )
         except NotFoundError:
             return None
-        return [Person(**hit["_source"]) for hit in doc['hits']['hits']]
+        return [Person(**hit['_source']) for hit in doc['hits']['hits']]
 
     async def enrich_person_data(self, main_person_info: Person, fw_person_info: Person) -> Person:
         """Обогащает данные по персоне, возвращает полные данные по персоне."""
@@ -82,12 +82,12 @@ class PersonService:
             docs = await self.elastic.search(
                 index=self.es_index,
                 body={
-                    "query": {
-                        "bool": {
-                            "must": [
+                    'query': {
+                        'bool': {
+                            'must': [
                                 {
-                                    "match_phrase": {
-                                        "id": person_id,
+                                    'match_phrase': {
+                                        'id': person_id,
                                     },
                                 },
                             ],

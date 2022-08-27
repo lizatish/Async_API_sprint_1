@@ -11,6 +11,7 @@ router = APIRouter()
 
 
 def get_page(req: Request) -> dict:
+    """Кастомный валидатор параметров запроса."""
     number = req.query_params.get('page[number]')
     size = req.query_params.get('page[size]')
     if number and size:
@@ -18,8 +19,8 @@ def get_page(req: Request) -> dict:
     else:
         from_ = 0
     return {
-        "size": int(size) if size else 5,
-        "from": from_
+        'size': int(size) if size else 5,
+        'from': from_,
     }
 
 
@@ -65,7 +66,7 @@ async def films_by_person(person_id: str,
     return result
 
 
-@router.get("/search", response_model=List[Person])
+@router.get('/search', response_model=List[Person])
 async def search_persons(
         query: str,
         person_service: PersonService = Depends(get_person_service),
@@ -74,11 +75,11 @@ async def search_persons(
 ) -> List[Person]:
     """Ищет совпадения по персонам."""
     persons = await person_service.search_person(
-        from_=page['from'], size=page['size'], query=query
+        from_=page['from'], size=page['size'], query=query,
     )
     if not persons:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='film not found'
+            status_code=HTTPStatus.NOT_FOUND, detail='film not found',
         )
 
     person_ids = [person.id for person in persons]

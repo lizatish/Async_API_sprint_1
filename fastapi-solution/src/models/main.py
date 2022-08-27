@@ -6,6 +6,8 @@ from models.common import UUIDMixin
 
 
 class PersonFilm(BaseModel):
+    """Модель представления вложенного фильма внутри персоны."""
+
     role: Literal['actor', 'writer', 'director']
     film_ids: List[str]
 
