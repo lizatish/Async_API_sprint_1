@@ -1,27 +1,14 @@
 from http import HTTPStatus
 from typing import List, Optional, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from services.film_service import FilmService, get_film_service
-from services.person_service import PersonService, get_person_service
+from api.v1.utils import get_page
+from services.films import FilmService, get_film_service
+from services.persons import PersonService, get_person_service
 
 router = APIRouter()
-
-
-def get_page(req: Request) -> dict:
-    """Кастомный валидатор параметров запроса."""
-    number = req.query_params.get('page[number]')
-    size = req.query_params.get('page[size]')
-    if number and size:
-        from_ = (int(number) - 1) * int(size)
-    else:
-        from_ = 0
-    return {
-        'size': int(size) if size else 5,
-        'from': from_,
-    }
 
 
 class PersonFilm(BaseModel):

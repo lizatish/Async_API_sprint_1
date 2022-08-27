@@ -5,11 +5,10 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 
+from core.config import conf
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.main import Person
-
-PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
 
 class PersonService:
@@ -73,7 +72,7 @@ class PersonService:
 
     async def _put_person_to_cache(self, person: Person):
         """Получает персону из кеша редиса."""
-        await self.redis.set(person.id, person.json(), expire=PERSON_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(person.id, person.json(), expire=conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         """Возвращает персону из эластика."""
@@ -103,7 +102,7 @@ class PersonService:
 
         return person
 
-    async def enrich_persons_list_data(self, persons: list[Person], fw_person_info: list[Person]) -> list[Person]:
+    async def enrich_persons_list_data(self, persons: List[Person], fw_person_info: List[Person]) -> List[Person]:
         """Возвращает полный список персон с расширенными данными."""
         full_persons = []
         for person_base, person_fw in zip(persons, fw_person_info):

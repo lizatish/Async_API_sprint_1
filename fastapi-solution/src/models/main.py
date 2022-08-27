@@ -32,7 +32,7 @@ class Film(UUIDMixin):
     title: str
     imdb_rating: float
     description: Optional[str]
-    genre: List[Genre] = []
+    genres: List[Genre] = []
     actors: List[Person] = []
     writers: List[Person] = []
     directors: List[Person] = []

@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from services.genre_service import GenreService, get_genre_service
+from services.genres import GenreService, get_genre_service
 
 router = APIRouter()
 
