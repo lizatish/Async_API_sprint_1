@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 
     # Настройки Elasticsearch
-    ELASTIC_HOST = os.getenv('ELASTIC_HOST', 'localhost')
+    ELASTIC_HOST = os.getenv('ELASTIC_HOST', 'elastic')
     ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
     # Корень проекта

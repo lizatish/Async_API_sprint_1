@@ -66,7 +66,6 @@ class Transform(object):
         Returns:
             dict: Обогащенный словарь для elastic
         """
-
         if doc.pfw_role:
             role_case_name = f'{doc.pfw_role}s'
             names_case_name = f'{role_case_name}_names'
