@@ -36,10 +36,6 @@ class FilterSimpleValues(BaseFilter):
 
 
 class FilterNestedValues(BaseFilter):
-    genres_names = 'genres_names'
-    directors_names = 'directors_names'
-    actors_names = 'actors_names'
-    writers_names = 'writers_names'
     genres = 'genres'
     actors = 'actors'
     writers = 'writers'
