@@ -152,34 +152,14 @@ class FilmService:
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         person = None
         roles = ['writers', 'actors', 'directors']
-        for role in roles:
-            try:
-                docs = await self.elastic.search(
-                    index=self.es_index,
-                    body={
-                        "query": {
-                            "nested": {
-                                "path": role,
-                                "query": {
-                                    "bool": {
-                                        "must": [
-                                            {
-                                                "match": {
-                                                    f"{role}.id": person_id,
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                            },
-                        },
-                    },
-                )
+        try:
+            docs = await self.get_film_works_by_person_ids([person_id])
 
+            for doc in docs['hits']['hits']:
+                source = doc['_source']
                 persons_roles = {}
-                for doc in docs['hits']['hits']:
-                    source = doc['_source']
 
+                for role in roles:
                     person_roles = list(filter(lambda x: x['id'] == person_id, source[role]))
                     if not person_roles:
                         continue
@@ -204,8 +184,8 @@ class FilmService:
                     else:
                         person.films.append(person_film)
 
-            except NotFoundError:
-                pass
+        except NotFoundError:
+            pass
         return person
 
     async def _put_film_to_cache(self, film: Film):
@@ -219,7 +199,6 @@ class FilmService:
         try:
             docs = await self.get_film_works_by_person_ids(person_ids)
 
-
             for person_id in person_ids:
                 person = None
 
@@ -228,7 +207,6 @@ class FilmService:
                     persons_roles = {}
 
                     for role in roles:
-
                         dirty_person_roles = list(filter(lambda x: x['id'] == person_id, source[role]))
                         person_roles = list({v['id']: v for v in dirty_person_roles}.values())
                         if not person_roles:
