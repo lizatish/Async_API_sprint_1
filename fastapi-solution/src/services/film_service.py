@@ -211,64 +211,90 @@ class FilmService:
     async def _put_film_to_cache(self, film: Film):
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
-    async def get_person_by_ids(self, person_ids: List[str]):
+    async def get_person_by_ids(self, person_ids: List[str]) -> List[Person]:
 
-        person = None
+        persons = []
         roles = ['writers', 'actors', 'directors']
-        for role in roles:
-            try:
-                docs = await self.elastic.search(
-                    index=self.es_index,
-                    body={
-                        "query": {
-                            "nested": {
-                                "path": role,
-                                "query": {
-                                    "bool": {
-                                        "filter": {
-                                            f"{role}.id": {
-                                                "values": person_ids,
-                                            }
-                                        },
 
+        try:
+            docs = await self.get_film_works_by_person_ids(person_ids)
+
+
+            for person_id in person_ids:
+                person = None
+
+                for doc in docs['hits']['hits']:
+                    source = doc['_source']
+                    persons_roles = {}
+
+                    for role in roles:
+
+                        dirty_person_roles = list(filter(lambda x: x['id'] == person_id, source[role]))
+                        person_roles = list({v['id']: v for v in dirty_person_roles}.values())
+                        if not person_roles:
+                            continue
+
+                        person_id, person_name = person_roles[0]['id'], person_roles[0]['name']
+                        if role not in persons_roles:
+                            persons_roles[role] = {
+                                'id': person_id,
+                                'full_name': person_name,
+                                'fw_ids': [source['id']]
+                            }
+                        else:
+                            persons_roles[role]['fw_ids'].append(source['id'])
+
+                    for role, role_data in persons_roles.items():
+                        person_film = PersonFilm(role=role[:-1], film_ids=role_data['fw_ids'])
+                        if not person:
+                            person = Person(
+                                id=role_data['id'],
+                                full_name=role_data['full_name'],
+                                films=[person_film])
+                        else:
+                            person.films.append(person_film)
+                persons.append(person)
+
+        except NotFoundError:
+            pass
+        return persons
+
+    async def get_film_works_by_person_ids(self, person_ids):
+        return await self.elastic.search(
+            index=self.es_index,
+            body={
+                "query": {
+                    'bool': {
+                        'should': [{
+                            "nested": {
+                                "path": "writers",
+                                "query": {
+                                    "terms": {
+                                        f"writers.id": person_ids
+                                    },
+                                },
+                            }}, {
+                            "nested": {
+                                "path": "actors",
+                                "query": {
+                                    "terms": {
+                                        f"actors.id": person_ids
+                                    },
+                                },
+                            }}, {
+                            "nested": {
+                                "path": "directors",
+                                "query": {
+                                    "terms": {
+                                        f"directors.id": person_ids
                                     },
                                 },
                             },
-                        },
+                        }]
                     },
-                )
-
-                persons_roles = {}
-                for doc in docs['hits']['hits']:
-                    source = doc['_source']
-
-                    person_roles = list(filter(lambda x: x['id'] == person_id, source[role]))
-                    if not person_roles:
-                        continue
-
-                    person_id, person_name = person_roles[0]['id'], person_roles[0]['name']
-                    if role not in persons_roles:
-                        persons_roles[role] = {
-                            'id': person_id,
-                            'full_name': person_name,
-                            'fw_ids': [source['id']]
-                        }
-                    else:
-                        persons_roles[role]['fw_ids'].append(source['id'])
-
-                for role, role_data in persons_roles.items():
-                    person_film = PersonFilm(role=role[:-1], film_ids=role_data['fw_ids'])
-                    if not person:
-                        person = Person(
-                            id=role_data['id'],
-                            full_name=role_data['full_name'],
-                            films=[person_film])
-                    else:
-                        person.films.append(person_film)
-
-            except NotFoundError:
-                pass
-        return person
+                },
+            }
+        )
 
 
 @lru_cache()

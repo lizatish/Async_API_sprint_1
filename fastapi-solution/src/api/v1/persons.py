@@ -82,8 +82,16 @@ async def search_persons(
 
     fw_person_info = await film_service.get_person_by_ids(person_ids)
 
+    full_persons = []
+    for person_base, person_fw in zip(persons, fw_person_info):
+        if person_fw:
+            full_person = await person_service.enrich_person_data(person_base, person_fw)
+        else:
+            full_person = person_base
+        full_persons.append(full_person)
+
     result = []
-    for person in persons:
+    for person in full_persons:
         result.append(
             Person(
                 uuid=person.id,
