@@ -34,56 +34,71 @@ class FilmService:
         return film
 
     async def get_scope_films(
-            self, from_: int, size: int, filter: dict, sort: str,
+            self, from_: int, size: int, filter: dict, sort: str, url: str,
     ) -> Optional[List[Film]]:
         """Функция для получения списка фильмов."""
-        films = await self._get_scope_films_from_elastic(
-            from_=from_, size=size, sort=sort, filter_=filter,
-        )
+        films = await self._films_from_cache(url)
         if not films:
-            return None
+            films = await self._get_scope_films_from_elastic(
+                from_=from_, size=size, sort=sort, filter_=filter,
+            )
+            if not films:
+                return None
+            await self._put_films_to_cache(films, url)
         return films
 
     async def search_film(
-            self, query: str, from_: int, size: int,
+            self, query: str, from_: int, size: int, url: str,
     ) -> Optional[List[Film]]:
         """Функция для поиска фильма."""
-        films = await self._search_film_from_elastic(
-            query=query, from_=from_, size=size,
-        )
+        films = await self._films_from_cache(url)
         if not films:
-            return None
+            films = await self._search_film_from_elastic(
+                query=query, from_=from_, size=size,
+            )
+            if not films:
+                return None
+            await self._put_films_to_cache(films, url)
         return films
 
     async def get_films_by_person(self, person_id: str) -> List[Optional[Film]]:
         """Возвращает фильмы, в которых участвовала персона."""
-        films = []
-        try:
-            docs = await self._get_by_person_ids_from_elastic([person_id])
-            for doc in docs['hits']['hits']:
-                source = doc['_source']
-                films.append(Film(**source))
-        except NotFoundError:
-            pass
+        films = await self._films_from_cache(f'film_by_person_{person_id}')
+        if not films:
+            films = []
+            try:
+                docs = await self._get_by_person_ids_from_elastic([person_id])
+                for doc in docs['hits']['hits']:
+                    source = doc['_source']
+                    films.append(Film(**source))
+                await self._put_films_to_cache(films, f'film_by_person_{person_id}')
+            except NotFoundError:
+                pass
         return films
 
     async def get_person_by_id(self, person_id: str) -> Optional[Person]:
         """Возвращает персону по идентификатору."""
-        person = await self._person_from_cache(person_id)
+        person = await self._person_from_cache(f'info_{person_id}')
         if not person:
             person = await self._get_person_from_elastic(person_id)
+            if not person:
+                return None
+            await self._put_person_to_cache(person)
         return person
 
     async def get_person_by_ids(self, person_ids: List[str]) -> List[Person]:
         """Возвращает набор персон по списку идентификаторов."""
-        persons = []
-        try:
-            docs = await self._get_by_person_ids_from_elastic(person_ids)
-            for person_id in person_ids:
-                person = await self._prepare_person(person_id, docs)
-                persons.append(person)
-        except NotFoundError:
-            pass
+        persons = await self._persons_from_cache('-'.join(person_ids))
+        if not persons:
+            persons = []
+            try:
+                docs = await self._get_by_person_ids_from_elastic(person_ids)
+                for person_id in person_ids:
+                    person = await self._prepare_person(person_id, docs)
+                    persons.append(person)
+                await self._put_persons_to_cache(persons, '-'.join(person_ids))
+            except NotFoundError:
+                pass
         return persons
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Optional[Person]]:
@@ -281,6 +296,42 @@ class FilmService:
                 },
             },
         )
+
+    async def _films_from_cache(self, url: str):
+        """Функция отдаёт список фильмов если они есть в кэше."""
+        data = await self.redis.lrange(url, 0, -1)
+        if not data:
+            return None
+        films = [Film.parse_raw(item) for item in data]
+        return reversed(films)
+
+    async def _put_films_to_cache(self, films: List[Film], url: str):
+        """Функция кладёт список фильмов в кэш."""
+        data = [item.json() for item in films]
+        await self.redis.lpush(
+            url, *data,
+        )
+        await self.redis.expire(url, conf.FILM_CACHE_EXPIRE_IN_SECONDS)
+
+    async def _persons_from_cache(self, url: str):
+        """Функция отдаёт список персон если они есть в кэше."""
+        data = await self.redis.lrange(url, 0, -1)
+        if not data:
+            return None
+        persons = [Person.parse_raw(item) for item in data]
+        return list(reversed(persons))
+
+    async def _put_persons_to_cache(self, persons: List[Person], url: str):
+        """Функция кладёт список персон в кэш."""
+        data = [item.json() for item in persons]
+        await self.redis.lpush(
+            url, *data,
+        )
+        await self.redis.expire(url, conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
+
+    async def _put_person_to_cache(self, person: Person):
+        """Получает персону из кеша редиса."""
+        await self.redis.set(f'info_{person.id}', person.json(), expire=conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()

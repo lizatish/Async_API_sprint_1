@@ -26,13 +26,19 @@ class PersonService:
         person = await self._person_from_cache(person_id)
         if not person:
             person = await self._get_person_from_elastic(person_id)
+            if not person:
+                return None
+            await self._put_person_to_cache(person)
         return person
 
-    async def search_person(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
+    async def search_person(self, query: str, from_: int, size: int, url: str) -> Optional[List[Person]]:
         """Возвращает совпадения по персоне."""
-        persons = await self._search_person_from_elastic(query=query, from_=from_, size=size)
+        persons = await self._persons_from_cache(url)
         if not persons:
-            return None
+            persons = await self._search_person_from_elastic(query=query, from_=from_, size=size)
+            if not persons:
+                return None
+            await self._put_persons_to_cache(persons, url)
         return persons
 
     async def _search_person_from_elastic(self, query: str, from_: int, size: int) -> Optional[List[Person]]:
@@ -57,10 +63,24 @@ class PersonService:
 
     async def enrich_person_data(self, main_person_info: Person, fw_person_info: Person) -> Person:
         """Обогащает данные по персоне, возвращает полные данные по персоне."""
-        person = main_person_info.copy()
-        person.films = fw_person_info.films.copy()
-        await self._put_person_to_cache(person)
+        person = await self._enriched_person_from_cache(main_person_info.id)
+        if not person:
+            person = main_person_info.copy()
+            person.films = fw_person_info.films.copy()
+            await self._put_enriched_person_to_cache(person)
         return person
+
+    async def _enriched_person_from_cache(self, person_id: str) -> Optional[Person]:
+        """Получает персону из кеша редиса."""
+        data = await self.redis.get(f'enriched_{person_id}')
+        if not data:
+            return None
+        person = Person.parse_raw(data)
+        return person
+
+    async def _put_enriched_person_to_cache(self, person: Person):
+        """Кладет персону в кеш редиса."""
+        await self.redis.set(f'enriched_{person.id}', person.json(), expire=conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
         """Кладет персону в кеш редиса."""
@@ -112,6 +132,22 @@ class PersonService:
                 full_person = person_base
             full_persons.append(full_person)
         return full_persons
+
+    async def _persons_from_cache(self, url: str):
+        """Функция отдаёт список персон если они есть в кэше."""
+        data = await self.redis.lrange(url, 0, -1)
+        if not data:
+            return None
+        persons = [Person.parse_raw(item) for item in data]
+        return list(reversed(persons))
+
+    async def _put_persons_to_cache(self, persons: List[Person], url: str):
+        """Функция кладёт список персон в кэш."""
+        data = [item.json() for item in persons]
+        await self.redis.lpush(
+            url, *data,
+        )
+        await self.redis.expire(url, conf.PERSON_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import List, Optional, Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from api.v1.utils import get_page
@@ -55,6 +55,7 @@ async def films_by_person(person_id: str,
 
 @router.get('/search', response_model=List[Person])
 async def search_persons(
+        request: Request,
         query: str,
         person_service: PersonService = Depends(get_person_service),
         film_service: FilmService = Depends(get_film_service),
@@ -62,17 +63,15 @@ async def search_persons(
 ) -> List[Person]:
     """Ищет совпадения по персонам."""
     persons = await person_service.search_person(
-        from_=page['from'], size=page['size'], query=query,
+        from_=page['from'], size=page['size'], query=query, url=request.url._url,
     )
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail='film not found',
         )
-
     person_ids = [person.id for person in persons]
     fw_person_info = await film_service.get_person_by_ids(person_ids)
     full_persons = await person_service.enrich_persons_list_data(persons, fw_person_info)
-
     result = []
     for person in full_persons:
         result.append(
@@ -92,8 +91,6 @@ async def person_details(person_id: str, person_service: PersonService = Depends
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
-
     fw_person_info = await film_service.get_person_by_id(person_id)
     person = await person_service.enrich_person_data(person, fw_person_info)
-
     return Person(uuid=person.id, full_name=person.full_name, films=person.films)
