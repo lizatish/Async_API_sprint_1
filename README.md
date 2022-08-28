@@ -20,3 +20,6 @@
 06 - Liza Tishkovets
 07 - Liza Tishkovets
 08 - Oleg Rubtsov
+
+Репозиторий для работы:
+https://github.com/lizatish/Async_API_sprint_1
