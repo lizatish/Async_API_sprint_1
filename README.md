@@ -16,13 +16,21 @@
 **От каждого разработчика ожидается выполнение минимум 40% от общего числа стори поинтов в спринте.**
 
 Как распределялись задачи:
-00 - Liza Tishkovets 01 - Liza Tishkovets 02 - Oleg Rubtsov 03 - Oleg Rubtsov 04 - Oleg Rubtsov 05 - Liza Tishkovets 06
-- Liza Tishkovets 07 - Liza Tishkovets 08 - Oleg Rubtsov
+
+- 00 - Liza Tishkovets
+- 01 - Liza Tishkovets
+- 02 - Oleg Rubtsov
+- 03 - Oleg Rubtsov
+- 04 - Oleg Rubtsov
+- 05 - Liza Tishkovets
+- 06 - Liza Tishkovets
+- 07 - Liza Tishkovets
+- 08 - Oleg Rubtsov
 
 Репозиторий для работы:
 https://github.com/lizatish/Async_API_sprint_1
 
-# Комментарий для ревьюера
+## Комментарий для ревьюера
 
 Мы оставили один порт (8000) у api-сервиса, тк в данном спринте не используем nginx. В будущем, при использовании nginx,
 данный порт будет закрыт
