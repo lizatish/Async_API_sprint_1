@@ -8,22 +8,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
     volumes:
       - $HOME/postgresql/data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
 
   elastic:
     image: elasticsearch:7.17.5
     environment:
       ES_JAVA_OPTS: "-Xms200m -Xmx200m"
       discovery.type: single-node
-    ports:
-      - '9200:9200'
 
   redis:
     container_name: redis
     image: redis
-    ports:
-      - "6379:6379"
     volumes:
       - ../data/redis:/data
     restart: always

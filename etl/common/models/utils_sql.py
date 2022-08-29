@@ -7,7 +7,7 @@ from common.models.main import FilmWorkId, PersonId, GenreId
 
 
 @dataclass(frozen=True)
-class EnrichResult(object):
+class EnrichResult:
     """Модель результата выполнения запроса по обогащению данных."""
 
     id: str
@@ -15,7 +15,7 @@ class EnrichResult(object):
 
 
 @dataclass(frozen=True)
-class MergeResult(object):
+class MergeResult:
     """Модель результата выполнения запроса по склейке данных."""
 
     film_work_id: FilmWorkId

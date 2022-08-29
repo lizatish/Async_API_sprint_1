@@ -12,7 +12,7 @@ from common.postgres_utils import backoff
 logger = get_logger()
 
 
-class ElasticsearchLoader(object):
+class ElasticsearchLoader:
     """Класс, реализующий запись данных в elasticsearch."""
 
     @backoff(elastic_transport.ConnectionError)

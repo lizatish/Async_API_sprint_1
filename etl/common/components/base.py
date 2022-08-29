@@ -13,7 +13,7 @@ from common.utils.convert import convert_sql2models
 logger = get_logger()
 
 
-class BaseExtractor(object):
+class BaseExtractor:
     """Базовый класс ETL-пайплайна для работы с postgres."""
 
     def __init__(self, connection: pg_connection):

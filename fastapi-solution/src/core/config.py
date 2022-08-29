@@ -13,25 +13,25 @@ class Settings(BaseSettings):
     logging_config.dictConfig(LOGGING)
 
     # Название проекта. Используется в Swagger-документации
-    PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
+    PROJECT_NAME: str = 'movies'
 
     # Настройки Redis
-    REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
-    REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+    REDIS_HOST: str = 'redis'
+    REDIS_PORT: int = 6379
 
     # Настройки Elasticsearch
-    ELASTIC_HOST = os.getenv('ELASTIC_HOST', 'elastic')
-    ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
+    ELASTIC_HOST: str = 'elastic'
+    ELASTIC_PORT: int = 9200
 
     # Корень проекта
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Время хранения данных в кэше
-    FILM_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('FILM_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
-    GENRE_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('GENRE_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
-    PERSON_CACHE_EXPIRE_IN_SECONDS = int(os.getenv('PERSON_CACHE_EXPIRE_IN_SECONDS', 60 * 5))
+    FILM_CACHE_EXPIRE_IN_SECONDS: int = 60 * 5
+    GENRE_CACHE_EXPIRE_IN_SECONDS: int = 60 * 5
+    PERSON_CACHE_EXPIRE_IN_SECONDS: int = 60 * 5
 
-    class Config(object):
+    class Config:
         """Дополнительные базовые настройки."""
 
         env_file = '.env'

@@ -10,7 +10,7 @@ GenreId = str
 
 
 @dataclass(frozen=True)
-class FilmWork(object):
+class FilmWork:
     """FilmWork модель."""
 
     id: FilmWorkId
@@ -25,7 +25,7 @@ class FilmWork(object):
 
 
 @dataclass(frozen=True)
-class Genre(object):
+class Genre:
     """Genre модель."""
 
     id: GenreId
@@ -36,7 +36,7 @@ class Genre(object):
 
 
 @dataclass(frozen=True)
-class Person(object):
+class Person:
     """Person модель."""
 
     id: PersonId
@@ -46,7 +46,7 @@ class Person(object):
 
 
 @dataclass(frozen=True)
-class GenreFilmWork(object):
+class GenreFilmWork:
     """GenreFilmWork модель."""
 
     id: str
@@ -56,7 +56,7 @@ class GenreFilmWork(object):
 
 
 @dataclass(frozen=True)
-class PersonFilmWork(object):
+class PersonFilmWork:
     """PersonFilmWork модель."""
 
     id: str

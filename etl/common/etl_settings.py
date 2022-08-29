@@ -19,7 +19,7 @@ class ETLSettings(BaseSettings):
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    class Config(object):
+    class Config:
         """Дополнительные базовые настройки."""
 
         env_file = '.env'

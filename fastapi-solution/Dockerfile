@@ -4,7 +4,7 @@ WORKDIR /opt
 
 COPY requirements.txt requirements.txt
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install -r requirements.txt
 
 COPY . /opt/app/
 

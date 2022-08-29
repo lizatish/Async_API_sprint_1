@@ -4,7 +4,7 @@ import os
 from typing import Any, Optional
 
 
-class BaseStorage(object):
+class BaseStorage:
     """Базовый класс хранения данных."""
 
     @abc.abstractmethod
@@ -59,7 +59,7 @@ class JsonFileStorage(BaseStorage):
         return state_data
 
 
-class State(object):
+class State:
     """Класс для хранения состояния при работе с данными.
 
     Нужен, чтобы постоянно не перечитывать данные с начала.

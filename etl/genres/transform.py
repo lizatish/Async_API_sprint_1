@@ -3,7 +3,7 @@ from typing import Iterator
 from common.models.main import Genre
 
 
-class Transform(object):
+class Transform:
     """Класс, трансформирующий данные после бд для попадания в elastic."""
 
     def __init__(self):
