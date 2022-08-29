@@ -11,17 +11,21 @@ from services.persons import PersonService, get_person_service
 router = APIRouter()
 
 
-@router.get('/{person_id}/film', response_model=List[FilmByPerson], summary='Get films with person member')
+@router.get(
+    '/{person_id}/film',
+    response_model=List[FilmByPerson],
+    summary='Найти фильмы по идентификатору участника',
+)
 async def films_by_person(
         person_id: str,
         film_service: FilmService = Depends(get_film_service),
 ) -> List[FilmByPerson]:
     """
-    Return list of films, where a person was a member with info:
+    Возвращает список фильмов, где участвовал персонаж со следующим содержимым:
 
-    - **uuid**: film id
-    - **title**: film title
-    - **imdb_rating**: film imdb rating
+    - **uuid**: идентификатор
+    - **full_name**: полное имя
+    - **films**: фильмы, где участвовал
     """
     fws_by_person = await film_service.get_films_by_person(person_id)
     if not fws_by_person:
@@ -36,20 +40,20 @@ async def films_by_person(
     ]
 
 
-@router.get('/search', response_model=List[Person], summary='Search persons')
+@router.get('/search', response_model=List[Person], summary='Найти участников фильма')
 async def search_persons(
         request: Request,
-        query: str = Query(..., description="Search query"),
+        query: str = Query(..., description='Поисковой запрос'),
         page: dict = Depends(get_page),
         person_service: PersonService = Depends(get_person_service),
         film_service: FilmService = Depends(get_film_service),
 ) -> List[Person]:
     """
-    Return list of all persons matching the search terms with info:
+    Возвращает список всех персон, удовлетворяющих условиям поиска со следующим содержимым:
 
-    - **uuid**: person id
-    - **full_name**: person full name
-    - **films**: films where the person was a member
+    - **uuid**: идентификатор
+    - **full_name**: полное имя
+    - **films**: фильмы, где участвовал
     """
     persons = await person_service.search_person(
         from_=page['from'], size=page['size'], query=query, url=request.url._url,
@@ -70,18 +74,18 @@ async def search_persons(
     ]
 
 
-@router.get('/{person_id}', response_model=Person, summary='Get person by id')
+@router.get('/{person_id}', response_model=Person, summary='Найти участника фильма по идентификатору')
 async def person_details(
         person_id: str,
         person_service: PersonService = Depends(get_person_service),
         film_service: FilmService = Depends(get_film_service),
 ) -> Person:
     """
-    Return a genre by id with all the information:
+    Возвращает подробную информацию об участнике фильма со следующим содержимым:
 
-    - **uuid**: person id
-    - **full_name**: person full name
-    - **films**: films where the person was a member
+    - **uuid**: идентификатор
+    - **full_name**: полное имя
+    - **films**: фильмы, где участвовал
     """
     person = await person_service.get_by_id(person_id)
     if not person:

@@ -10,7 +10,12 @@ from services.films import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/', response_model=List[ShortFilm], summary='Get and sort all films matching the filter condition')
+@router.get(
+    '/',
+    response_model=List[ShortFilm],
+    summary='Найти фильмы в порядке убывания/возрастания рейтинга,'
+            ' удовлетворяющих фильтру',
+)
 async def films_scope(
         request: Request,
         page: dict = Depends(get_page),
@@ -19,11 +24,11 @@ async def films_scope(
         sort: str = Query(default='-imdb_rating', description='Сортировка'),
 ) -> List[ShortFilm]:
     """
-    Returns all sorted films matching the filter condition with info:
+    Возвращает отсортированный и отфильтрованный список фильмов со следующим содержимым:
 
-    - **uuid**: film id
-    - **title**: film title
-    - **imdb_rating**: film imdb rating
+    - **uuid**: идентификатор
+    - **title**: название
+    - **imdb_rating**: рейтинг imdb
     """
     films = await film_service.get_scope_films(
         from_=page['from'], size=page['size'], filter=filter, sort=sort, url=request.url._url,
@@ -37,7 +42,7 @@ async def films_scope(
     ) for item in films]
 
 
-@router.get('/search', response_model=List[ShortFilm], summary='Find a list of films by match')
+@router.get('/search', response_model=List[ShortFilm], summary='Найти список фильмов по совпадению')
 async def film_search(
         request: Request,
         query: str,
@@ -45,16 +50,16 @@ async def film_search(
         page: dict = Depends(get_page),
 ) -> List[ShortFilm]:
     """
-     Returns a list of films matching the search terms with info:
+    Возвращает список фильмов, удовлетворяющих поиску со следующим содержимым:
 
-    - **uuid**: film id
-    - **title**: film title
-    - **imdb_rating**: film imdb rating
-    - **description**: film description
-    - **genres**: all genres of film
-    - **actors**: all actors of film
-    - **writers**: all writers of film
-    - **directors**: all directors of film
+    - **uuid**: идентификатор
+    - **title**: название
+    - **imdb_rating**: рейтинг imdb
+    - **description**: описание
+    - **genres**: список жанров фильма
+    - **actors**: список актеров - участников фильма
+    - **writers**: список сценаристов - участников фильма
+    - **directors**: список режиссеров - участников фильма
     """
     films = await film_service.search_film(
         from_=page['from'], size=page['size'], query=query, url=request.url._url,
@@ -68,21 +73,21 @@ async def film_search(
     ) for item in films]
 
 
-@router.get('/{film_id}', response_model=Film, summary='Find film by id')
+@router.get('/{film_id}', response_model=Film, summary='Поиск фильма по идентификатору')
 async def film_details(
-        film_id: str , film_service: FilmService = Depends(get_film_service),
+        film_id: str, film_service: FilmService = Depends(get_film_service),
 ) -> Film:
     """
-    Return a film with all the information:
+    Возвращает фильм со следующим содержимым:
 
-    - **uuid**: film id
-    - **title**: film title
-    - **imdb_rating**: film imdb rating
-    - **description**: film description
-    - **genres**: all genres of film
-    - **actors**: all actors of film
-    - **writers**: all writers of film
-    - **directors**: all directors of film
+    - **uuid**: идентификатор
+    - **title**: название
+    - **imdb_rating**: рейтинг imdb
+    - **description**: описание
+    - **genres**: список жанров фильма
+    - **actors**: список актеров - участников фильма
+    - **writers**: список сценаристов - участников фильма
+    - **directors**: список режиссеров - участников фильма
     """
     film = await film_service.get_by_id(film_id)
     if not film:
