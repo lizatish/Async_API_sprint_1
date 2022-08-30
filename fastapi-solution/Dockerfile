@@ -10,4 +10,4 @@ COPY . /opt/app/
 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/app/src/"
 
-CMD ["uvicorn", "app.src.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.src.main:app", "--host", "0.0.0.0", "--port", "8000"]

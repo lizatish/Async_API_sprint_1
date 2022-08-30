@@ -1,22 +1,15 @@
 import re
 
-from fastapi import Request
+from fastapi import Query, Request
+from models.common import FilterNestedValues, FilterSimpleValues
+from pydantic import BaseModel
 
-from models.common import FilterSimpleValues, FilterNestedValues
 
+class Paginator(BaseModel):
+    """Модель для пагинации."""
 
-def get_page(req: Request) -> dict:
-    """Функция преобразует данные для пагинации из запроса к необходимому виду."""
-    number = req.query_params.get('page[number]')
-    size = req.query_params.get('page[size]')
-    if number and size:
-        from_ = (int(number) - 1) * int(size)
-    else:
-        from_ = 0
-    return {
-        'size': int(size) if size else 5,
-        'from': from_,
-    }
+    page_size: int = Query(default=50, alias='size', ge=1)
+    page_number: int = Query(default=0, alias='number')
 
 
 def validate_filter_values(filter_: dict) -> dict:
