@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from api.v1.errors import FilmNotFound
 from api.v1.schemas.films import ShortFilm, Film, Person, Genre
-from api.v1.utils import get_page, get_filter
+from api.v1.utils import Paginator, get_filter
 from services.films import FilmService, get_film_service
 
 router = APIRouter()
@@ -18,7 +18,7 @@ router = APIRouter()
 )
 async def films_scope(
         request: Request,
-        page: dict = Depends(get_page),
+        paginator: Paginator = Depends(),
         film_service: FilmService = Depends(get_film_service),
         filter: dict = Depends(get_filter),
         sort: str = Query(default='-imdb_rating', description='Сортировка'),
@@ -30,8 +30,9 @@ async def films_scope(
     - **title**: название
     - **imdb_rating**: рейтинг imdb
     """
+    from_ = ((paginator.page_number - 1) * paginator.page_size) if (paginator.page_number > 1) else 0
     films = await film_service.get_scope_films(
-        from_=page['from'], size=page['size'], filter=filter, sort=sort, url=request.url._url,
+        from_=from_, size=paginator.page_size, filter=filter, sort=sort, url=request.url._url,
     )
     if not films:
         raise FilmNotFound()
@@ -47,7 +48,7 @@ async def film_search(
         request: Request,
         query: str,
         film_service: FilmService = Depends(get_film_service),
-        page: dict = Depends(get_page),
+        paginator: Paginator = Depends(),
 ) -> List[ShortFilm]:
     """
     Возвращает список фильмов, удовлетворяющих поиску со следующим содержимым:
@@ -61,8 +62,9 @@ async def film_search(
     - **writers**: список сценаристов - участников фильма
     - **directors**: список режиссеров - участников фильма
     """
+    from_ = ((paginator.page_number - 1) * paginator.page_size) if (paginator.page_number > 1) else 0
     films = await film_service.search_film(
-        from_=page['from'], size=page['size'], query=query, url=request.url._url,
+        from_=from_, size=paginator.page_size, query=query, url=request.url._url,
     )
     if not films:
         raise FilmNotFound()

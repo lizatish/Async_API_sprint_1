@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request, Query
 
 from api.v1.errors import PersonNotFound
 from api.v1.schemas.persons import FilmByPerson, Person
-from api.v1.utils import get_page
+from api.v1.utils import Paginator
 from services.films import FilmService, get_film_service
 from services.persons import PersonService, get_person_service
 
@@ -44,7 +44,7 @@ async def films_by_person(
 async def search_persons(
         request: Request,
         query: str = Query(..., description='Поисковой запрос'),
-        page: dict = Depends(get_page),
+        paginator: Paginator = Depends(),
         person_service: PersonService = Depends(get_person_service),
         film_service: FilmService = Depends(get_film_service),
 ) -> List[Person]:
@@ -55,8 +55,9 @@ async def search_persons(
     - **full_name**: полное имя
     - **films**: фильмы, где участвовал
     """
+    from_ = ((paginator.page_number - 1) * paginator.page_size) if (paginator.page_number > 1) else 0
     persons = await person_service.search_person(
-        from_=page['from'], size=page['size'], query=query, url=request.url._url,
+        from_=from_, size=paginator.page_size, query=query, url=request.url._url,
     )
     if not persons:
         raise PersonNotFound()

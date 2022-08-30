@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from logging import config as logging_config
 
 from pydantic import BaseSettings
@@ -38,4 +39,6 @@ class Settings(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-conf = Settings()
+@lru_cache()
+def get_settings():
+    return Settings()

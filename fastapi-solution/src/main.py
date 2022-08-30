@@ -7,10 +7,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api.v1 import films, genres, persons
-from core.config import conf
+from core.config import get_settings
 from core.logger import LOGGING
 from db import elastic
 from db import redis
+
+conf = get_settings()
 
 app = FastAPI(
     title=conf.PROJECT_NAME,
