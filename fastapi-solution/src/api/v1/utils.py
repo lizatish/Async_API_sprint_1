@@ -8,8 +8,8 @@ from pydantic import BaseModel
 class Paginator(BaseModel):
     """Модель для пагинации."""
 
-    page_size: int = Query(default=50, alias='page[size]', ge=1)
-    page_number: int = Query(default=0, alias='page[number]')
+    page_size: int = Query(default=50, alias='size', ge=1)
+    page_number: int = Query(default=0, alias='number')
 
 
 def validate_filter_values(filter_: dict) -> dict:
